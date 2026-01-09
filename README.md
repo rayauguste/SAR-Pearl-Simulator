@@ -2,6 +2,17 @@
 
 A web-based simulator for calculating pearl drop rates in Super Animal Royale. This tool helps you estimate how many pearls of each type you'll receive based on your daily clam collection and custom drop probability settings.
 
+## Why This Tool Exists
+
+As a dedicated Super Animal Royale player, I built this simulator to help plan my pearl farming strategy. The game's pearl drop rates can be frustratingly rare (especially Black and Gold pearls!), and it's hard to know if all that grinding is worth it without seeing what you might actually get.
+
+This tool answers questions like:
+- **"If I collect 150 clams per day for 50 days, how many Black Pearls can I realistically expect?"**
+- **"How long will it take me to get enough pearls for that cosmetic I want?"**
+- **"Is it worth doing multiple island loops per day, or should I focus on other activities?"**
+
+By testing out different scenarios with the actual drop rates, you can see ahead of time what kind of results you might get and decide if the grind is worth your time.
+
 ## Features
 
 - Simulate pearl drops across multiple days
