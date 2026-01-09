@@ -143,7 +143,7 @@
 
       canvas {
         width: 100%;
-        height: 200px;
+        height: 280px;
         background: rgba(15, 15, 25, 0.6);
         border-radius: 12px;
         border: 1px solid rgba(255, 255, 255, 0.05);
@@ -442,7 +442,7 @@
       };
 
       const pearlColors = {
-        "Black Pearl": "#111",
+        "Black Pearl": "#333333",
         "Gold Pearl": "#ffd369",
         "Purple Pearl": "#a56cff",
         "Blue Pearl": "#4aa3ff",
@@ -482,73 +482,199 @@
       }
 
       function drawChart(totals) {
-        const c = document.getElementById("chart");
-        const ctx = c.getContext("2d");
-        c.width = c.clientWidth;
-        c.height = c.clientHeight;
+        try {
+          const c = document.getElementById("chart");
+          if (!c) {
+            console.error("Chart canvas not found");
+            return;
+          }
+          
+          const ctx = c.getContext("2d");
+          if (!ctx) {
+            console.error("Could not get canvas context");
+            return;
+          }
+          
+          // Get actual client dimensions
+          const displayWidth = Math.max(400, c.clientWidth || 400);
+          const displayHeight = Math.max(280, c.clientHeight || 280);
+          
+          // Reset canvas size to force clear (this also clears the canvas)
+          c.width = displayWidth;
+          c.height = displayHeight;
+          
+          // Explicitly clear the canvas (context is still valid after resize)
+          ctx.clearRect(0, 0, displayWidth, displayHeight);
 
-        ctx.clearRect(0, 0, c.width, c.height);
-
-        const entries = Object.entries(totals);
-        const max = Math.max(...entries.map((e) => e[1]));
-
-        const barW = c.width / entries.length;
-        const padding = 10;
-
-        // Draw background for all bars (optional)
-        ctx.fillStyle = "#333";
-        ctx.fillRect(
-          padding,
-          padding,
-          c.width - 2 * padding,
-          c.height - 2 * padding
-        );
-
-        entries.forEach(([k, v], i) => {
-          const x = i * barW + barW / 2;
-          const y = c.height - padding - (v / max) * (c.height - 2 * padding);
-
-          // Draw a small circle for the value
-          ctx.fillStyle = pearlColors[k];
+          // Always show all 6 pearl types in fixed order (rarest to most common)
+          const pearlOrder = [
+            "Black Pearl",
+            "Gold Pearl",
+            "Purple Pearl",
+            "Blue Pearl",
+            "Green Pearl",
+            "White Pearl"
+          ];
+          
+          // Get values for all pearls, defaulting to 0 if not present
+          const entries = pearlOrder.map((k) => {
+            const value = totals[k] || 0;
+            return [k, typeof value === 'number' ? value : 0];
+          });
+          
+          // Calculate max value, but ensure it's at least 1 to avoid division by zero
+          const values = entries.map((e) => {
+            const val = e[1];
+            return (typeof val === 'number' && !isNaN(val) && isFinite(val)) ? val : 0;
+          });
+          const max = Math.max(1, ...values);
+          
+          if (!isFinite(max) || max <= 0) {
+            console.error("Invalid max value:", max);
+            return;
+          }
+          
+          const padding = { top: 40, right: 20, bottom: 50, left: 50 };
+          const chartWidth = Math.max(0, displayWidth - padding.left - padding.right);
+          const chartHeight = Math.max(0, displayHeight - padding.top - padding.bottom);
+          const barWidth = Math.max(0, (chartWidth / 6) * 0.7);
+          const barSpacing = Math.max(0, chartWidth / 6);
+          
+          if (chartWidth <= 0 || chartHeight <= 0 || barWidth <= 0) {
+            console.error("Invalid chart dimensions:", { chartWidth, chartHeight, barWidth });
+            return;
+          }
+        
+        // Draw background
+        ctx.fillStyle = "rgba(15, 15, 25, 0.6)";
+        ctx.fillRect(0, 0, displayWidth, displayHeight);
+        
+        // Draw grid lines
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+        ctx.lineWidth = 1;
+        const gridLines = 5;
+        for (let i = 0; i <= gridLines; i++) {
+          const y = padding.top + (chartHeight / gridLines) * i;
           ctx.beginPath();
-          ctx.arc(x, y, 6, 0, Math.PI * 2);
-          ctx.fill();
-        });
-
-        // Draw lines connecting pearls
-        entries.forEach(([k, v], i) => {
-          if (i === 0) return;
-          const prevV = entries[i - 1][1];
-          const prevX = (i - 1) * barW + barW / 2;
-          const prevY =
-            c.height - padding - (prevV / max) * (c.height - 2 * padding);
-
-          const currX = i * barW + barW / 2;
-          const currY =
-            c.height - padding - (v / max) * (c.height - 2 * padding);
-
-          ctx.strokeStyle = pearlColors[k];
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.moveTo(prevX, prevY);
-          ctx.lineTo(currX, currY);
+          ctx.moveTo(padding.left, y);
+          ctx.lineTo(displayWidth - padding.right, y);
           ctx.stroke();
-        });
+          
+          // Y-axis labels
+          const value = max - (max / gridLines) * i;
+          ctx.fillStyle = "#aaa";
+          ctx.font = "11px sans-serif";
+          ctx.textAlign = "right";
+          ctx.fillText(Math.round(value).toLocaleString(), padding.left - 10, y + 4);
+        }
+        
+          // Draw bars - always show all 6 bars
+          entries.forEach(([k, v], i) => {
+            try {
+              const x = padding.left + i * barSpacing + (barSpacing - barWidth) / 2;
+              const numValue = typeof v === 'number' && !isNaN(v) ? v : 0;
+              let barHeight = (numValue / max) * chartHeight;
+              
+              // Ensure minimum visible height for all bars (even zero values)
+              const minHeight = 4;
+              if (barHeight < minHeight && numValue === 0) {
+                barHeight = 0; // Truly zero bars have no height
+              } else if (barHeight < minHeight && numValue > 0) {
+                barHeight = minHeight; // Non-zero bars have minimum visibility
+              }
+              
+              const y = padding.top + chartHeight - barHeight;
+              
+              // Draw bar with gradient - ensure color exists
+              const color = pearlColors[k] || "#888888";
+              if (barHeight > 0 && isFinite(barHeight) && isFinite(y)) {
+                const gradient = ctx.createLinearGradient(x, y, x, y + barHeight);
+                gradient.addColorStop(0, color + "ff");
+                gradient.addColorStop(1, color + "aa");
+                ctx.fillStyle = gradient;
+                ctx.fillRect(x, y, barWidth, barHeight);
+                
+                // Bar border
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, y, barWidth, barHeight);
+              } else {
+                // Draw a thin line for zero values
+                ctx.strokeStyle = color + "40";
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(x, padding.top + chartHeight);
+                ctx.lineTo(x + barWidth, padding.top + chartHeight);
+                ctx.stroke();
+              }
+              
+              // Value label on top of bar (always show, even for 0)
+              ctx.fillStyle = numValue > 0 ? "#fff" : "#888";
+              ctx.font = "bold 12px sans-serif";
+              ctx.textAlign = "center";
+              const labelY = barHeight > 0 ? y - 8 : padding.top + chartHeight - 8;
+              ctx.fillText(
+                numValue.toLocaleString(),
+                x + barWidth / 2,
+                labelY
+              );
+              
+              // X-axis label (pearl name)
+              ctx.fillStyle = numValue > 0 ? "#ccc" : "#666";
+              ctx.font = "11px sans-serif";
+              ctx.textAlign = "center";
+              const labelX = x + barWidth / 2;
+              const labelYBottom = displayHeight - padding.bottom + 20;
+              ctx.save();
+              ctx.translate(labelX, labelYBottom);
+              ctx.rotate(-Math.PI / 4);
+              ctx.fillText(k.replace(" Pearl", ""), 0, 0);
+              ctx.restore();
+            } catch (err) {
+              console.error(`Error drawing bar for ${k}:`, err);
+            }
+          });
+          
+          // Draw axis lines
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+          ctx.lineWidth = 2;
+          // X-axis
+          ctx.beginPath();
+          ctx.moveTo(padding.left, padding.top + chartHeight);
+          ctx.lineTo(displayWidth - padding.right, padding.top + chartHeight);
+          ctx.stroke();
+          // Y-axis
+          ctx.beginPath();
+          ctx.moveTo(padding.left, padding.top);
+          ctx.lineTo(padding.left, padding.top + chartHeight);
+          ctx.stroke();
+        } catch (error) {
+          console.error("Error drawing chart:", error);
+        }
       }
 
       function runSimulation() {
+        // Get DOM elements
+        const resultsEl = document.getElementById("results");
+        const totalSummaryEl = document.getElementById("totalSummary");
+        const scrollHintEl = document.getElementById("scrollHint");
+        
         // Show scroll hint
-        document.getElementById("scrollHint").style.display = "block";
+        if (scrollHintEl) scrollHintEl.style.display = "block";
 
-        results.innerHTML = "";
+        // Clear previous results
+        if (resultsEl) resultsEl.innerHTML = "";
+        if (totalSummaryEl) totalSummaryEl.innerHTML = '<small>Run a simulation to populate totals.</small>';
+        
+        // Reset totals
         let totals = {};
         Object.keys(pearlImages).forEach((k) => (totals[k] = 0));
 
         const clams = +clamsPerDay.value;
         const days = +daysToSim.value;
 
-        const circles = Math.ceil(clams / 41);
-        const minutesPerDay = circles * 5;
+        const circles = clams / 41;
+        const minutesPerDay = (clams / 41) * 5;
 
         const pearlOrder = [
           "Empty Clam",
@@ -573,7 +699,7 @@
           let card = `
       <div class="day-box">
         <h3>Day ${d}</h3>
-        <small>Circles: ${circles} | Time: ${minutesPerDay} min</small>
+        <small>Circles: ${circles.toFixed(2)} | Time: ${minutesPerDay.toFixed(2)} min</small>
         <div class="pearls-grid">
     `;
 
@@ -587,23 +713,25 @@
           }
 
           card += `</div></div>`;
-          results.innerHTML += card;
+          if (resultsEl) resultsEl.innerHTML += card;
         }
 
-        // 🔹 DRAW CHART
-        drawChart(totals);
+        // 🔹 DRAW CHART (with a small delay to ensure canvas is ready)
+        setTimeout(() => {
+          drawChart(totals);
+        }, 50);
 
         // 🔹 TOTAL SUMMARY
         let totalClams = clams * days;
-        let totalCircles = Math.ceil(clams / 41) * days;
+        let totalCircles = (clams / 41) * days;
         let totalMinutes = totalCircles * 5;
         let totalHours = (totalMinutes / 60).toFixed(2);
 
         let totalHTML = `
     <div class="day-box">
       <h3>Total Across All Days</h3>
-      <p><small>Total circles: ${totalCircles}</small></p>
-      <p><small>Total time: ${totalMinutes} minutes (${totalHours} hours)</small></p>
+      <p><small>Total circles: ${totalCircles.toFixed(2)}</small></p>
+      <p><small>Total time: ${totalMinutes.toFixed(2)} minutes (${totalHours} hours)</small></p>
       <p><small>Total clams opened: ${totalClams}</small></p>
       <div class="pearls-grid">
   `;
@@ -625,7 +753,7 @@
         }
 
         totalHTML += "</div></div>";
-        totalSummary.innerHTML = totalHTML;
+        if (totalSummaryEl) totalSummaryEl.innerHTML = totalHTML;
       }
     </script>
   </body>
