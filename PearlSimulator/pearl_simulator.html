@@ -66,53 +66,65 @@
 
       /* TOP LAYOUT */
       .top-layout {
-        display: flex;
-        gap: 24px;
-        margin-bottom: 40px;
-        flex-wrap: wrap;
         max-width: 1400px;
-        margin-left: auto;
-        margin-right: auto;
+        margin: 0 auto 40px auto;
       }
 
-      .config-box,
-      .summary-box {
+      .combined-box {
         background: rgba(30, 30, 45, 0.7);
         backdrop-filter: blur(10px);
         padding: 28px;
         border-radius: 16px;
-        flex: 1;
-        min-width: 320px;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4),
                     0 2px 8px rgba(0, 0, 0, 0.2),
                     inset 0 1px 0 rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-      }
-
-      .config-box:hover,
-      .summary-box:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5),
-                    0 4px 12px rgba(0, 0, 0, 0.3),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-      }
-
-      .summary-box {
         border: 1px solid rgba(255, 211, 105, 0.3);
-        background: linear-gradient(135deg, rgba(30, 30, 45, 0.8) 0%, rgba(40, 35, 55, 0.7) 100%);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4),
-                    0 2px 8px rgba(0, 0, 0, 0.2),
-                    0 0 0 1px rgba(255, 211, 105, 0.1),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        display: flex;
+        gap: 32px;
+        flex-wrap: wrap;
       }
 
-      .summary-box:hover {
-        border-color: rgba(255, 211, 105, 0.5);
+      .combined-box:hover {
+        transform: translateY(-2px);
         box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5),
                     0 4px 12px rgba(0, 0, 0, 0.3),
                     0 0 0 1px rgba(255, 211, 105, 0.2),
                     inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      }
+
+      .config-section {
+        flex: 1;
+        min-width: 300px;
+      }
+
+      .chart-section {
+        flex: 1.5;
+        min-width: 400px;
+      }
+
+      .summary-section {
+        flex: 1;
+        min-width: 300px;
+      }
+
+      .config-section h3 {
+        margin-top: 0;
+      }
+
+      .chart-section h3,
+      .summary-section h3 {
+        margin-top: 0;
+      }
+
+      #description {
+        color: #c8c8c8;
+        font-size: 0.9rem;
+        line-height: 1.6;
+      }
+
+      #totalSummary {
+        margin-top: 0;
       }
 
       /* DESCRIPTION */
@@ -143,7 +155,7 @@
 
       canvas {
         width: 100%;
-        height: 280px;
+        height: 220px;
         background: rgba(15, 15, 25, 0.6);
         border-radius: 12px;
         border: 1px solid rgba(255, 255, 255, 0.05);
@@ -152,7 +164,7 @@
 
       /* INPUTS */
       input[type="number"] {
-        width: 140px;
+        width: 100%;
         padding: 10px 14px;
         margin: 0 0 4px 0;
         background: rgba(20, 20, 30, 0.8);
@@ -337,93 +349,83 @@
     <h1>Super Animal Royale – Pearl Drop Simulator</h1>
 
     <div class="top-layout">
-      <!-- LEFT -->
-      <div class="config-box">
-        <h3>Simulation Settings</h3>
-        <p style="color: #dddddd; font-size: 14px; line-height: 1.4">
-          Set the number of clams per day and how many days to simulate. Adjust
-          the drop chances for each pearl color to see how your results change.
-        </p>
+      <div class="combined-box">
+        <!-- LEFT: Settings -->
+        <div class="config-section">
+          <h3>Simulation Settings</h3>
+          <p style="color: #dddddd; font-size: 14px; line-height: 1.4; margin-bottom: 20px">
+            Set the number of clams per day and how many days to simulate. Adjust
+            the drop chances for each pearl color to see how your results change.
+          </p>
 
-        <label>Clams per day</label>
-        <input id="clamsPerDay" type="number" value="150" />
+          <label>Clams per day</label>
+          <input id="clamsPerDay" type="number" value="150" />
 
-        <label>Days to simulate</label>
-        <input id="daysToSim" type="number" value="50" />
+          <label>Days to simulate</label>
+          <input id="daysToSim" type="number" value="50" />
 
-        <h3 style="margin-top: 32px;">Drop Chances</h3>
-        <p style="color: #dddddd; font-size: 14px; line-height: 1.4">
-          Adjust the probability (0-1) for each pearl type to drop from a clam.
-          These default values represent the rare drop rates.
-        </p>
+          <h3 style="margin-top: 24px; margin-bottom: 12px;">Drop Chances</h3>
+          <p style="color: #dddddd; font-size: 14px; line-height: 1.4; margin-bottom: 16px">
+            Adjust the probability (0-1) for each pearl type to drop from a clam.
+            These default values represent the rare drop rates.
+          </p>
 
-        <label>Black</label>
-        <input
-          id="pBlack"
-          type="number"
-          step="0.00001"
-          value="0.0001"
-        />
-        <label>Gold</label>
-        <input
-          id="pGold"
-          type="number"
-          step="0.00001"
-          value="0.001"
-        />
-        <label>Purple</label>
-        <input
-          id="pPurple"
-          type="number"
-          step="0.00001"
-          value="0.0139"
-        />
-        <label>Blue</label>
-        <input
-          id="pBlue"
-          type="number"
-          step="0.00001"
-          value="0.045"
-        />
-        <label>Green</label>
-        <input
-          id="pGreen"
-          type="number"
-          step="0.00001"
-          value="0.1"
-        />
-        <label>White</label>
-        <input
-          id="pWhite"
-          type="number"
-          step="0.00001"
-          value="0.4"
-        />
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px;">
+            <div>
+              <label>Black</label>
+              <input id="pBlack" type="number" step="0.00001" value="0.0001" />
+            </div>
+            <div>
+              <label>Gold</label>
+              <input id="pGold" type="number" step="0.00001" value="0.001" />
+            </div>
+            <div>
+              <label>Purple</label>
+              <input id="pPurple" type="number" step="0.00001" value="0.0139" />
+            </div>
+            <div>
+              <label>Blue</label>
+              <input id="pBlue" type="number" step="0.00001" value="0.045" />
+            </div>
+            <div>
+              <label>Green</label>
+              <input id="pGreen" type="number" step="0.00001" value="0.1" />
+            </div>
+            <div>
+              <label>White</label>
+              <input id="pWhite" type="number" step="0.00001" value="0.4" />
+            </div>
+          </div>
 
-        <button onclick="runSimulation()">Run Simulation</button>
-        <div
-          id="scrollHint"
-          style="color: #ffd369; margin-top: 6px; display: none"
-        >
-          ⬇ Scroll down to see results!
-        </div>
-      </div>
-
-      <!-- RIGHT -->
-      <div class="summary-box">
-        <h3 class="summary-title">Simulation Assumptions</h3>
-        <div id="description">
-          Each simulated day represents a <strong>perfect island loop</strong>:
-          all <strong>41 clams untouched</strong>, no interference from other
-          players, and uninterrupted routing. Results show idealized outcomes.
+          <button onclick="runSimulation()">Run Simulation</button>
+          <div
+            id="scrollHint"
+            style="color: #ffd369; margin-top: 6px; display: none"
+          >
+            ⬇ Scroll down to see results!
+          </div>
         </div>
 
-        <div id="chartWrapper">
-          <canvas id="chart"></canvas>
+        <!-- MIDDLE: Chart -->
+        <div class="chart-section">
+          <h3 class="summary-title">Results Chart</h3>
+          <div id="description" style="margin-bottom: 16px;">
+            Each simulated day represents a <strong>perfect island loop</strong>:
+            all <strong>41 clams untouched</strong>, no interference from other
+            players, and uninterrupted routing. Results show idealized outcomes.
+          </div>
+
+          <div id="chartWrapper">
+            <canvas id="chart"></canvas>
+          </div>
         </div>
 
-        <div id="totalSummary">
-          <small>Run a simulation to populate totals.</small>
+        <!-- RIGHT: Summary -->
+        <div class="summary-section">
+          <h3 class="summary-title">Total Summary</h3>
+          <div id="totalSummary">
+            <small>Run a simulation to populate totals.</small>
+          </div>
         </div>
       </div>
     </div>
@@ -497,7 +499,7 @@
           
           // Get actual client dimensions
           const displayWidth = Math.max(400, c.clientWidth || 400);
-          const displayHeight = Math.max(280, c.clientHeight || 280);
+          const displayHeight = Math.max(220, c.clientHeight || 220);
           
           // Reset canvas size to force clear (this also clears the canvas)
           c.width = displayWidth;
