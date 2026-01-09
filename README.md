@@ -1,0 +1,79 @@
+# Super Animal Royale – Pearl Drop Simulator
+
+A web-based simulator for calculating pearl drop rates in Super Animal Royale. This tool helps you estimate how many pearls of each type you'll receive based on your daily clam collection and custom drop probability settings.
+
+## Features
+
+- Simulate pearl drops across multiple days
+- Customizable drop probability rates for each pearl type (Black, Gold, Purple, Blue, Green, White)
+- Visual chart showing pearl distribution
+- Day-by-day breakdown of results
+- Total summary statistics across all simulated days
+
+## Download and Setup
+
+### Step 1: Download from GitHub
+
+1. Navigate to the GitHub repository
+2. Click the green **"Code"** button
+3. Select **"Download ZIP"** to download the repository as a ZIP file
+4. Save the ZIP file to your desired location (e.g., `Downloads` folder)
+
+### Step 2: Extract the ZIP File
+
+1. Locate the downloaded ZIP file (e.g., `PearlSimulator-main.zip`)
+2. Right-click on the ZIP file
+3. Select **"Extract All..."** (Windows) or use your preferred extraction tool
+4. Choose a destination folder (e.g., `C:\Projects\PearlSimulator` or `Documents\PearlSimulator`)
+5. Click **"Extract"** to unzip the files
+
+### Step 3: Run the Simulator
+
+1. Navigate to the extracted folder
+2. Locate the file `pearl_simulator.html`
+3. Double-click the file to open it in your default web browser
+   - Alternatively, right-click the file and select **"Open with"** → choose your preferred browser (Chrome, Firefox, Edge, etc.)
+
+That's it! The simulator will load in your browser and you can start using it immediately.
+
+## How to Use
+
+1. **Set Simulation Parameters:**
+   - Enter the number of clams you collect per day
+   - Set how many days you want to simulate
+
+2. **Adjust Drop Chances (Optional):**
+   - Modify the probability values (0-1) for each pearl type
+   - Default values represent rare drop rates
+
+3. **Run Simulation:**
+   - Click the **"Run Simulation"** button
+   - Scroll down to view day-by-day results
+   - Check the summary box for total statistics and visual chart
+
+## Requirements
+
+- A modern web browser (Chrome, Firefox, Edge, Safari, etc.)
+- No additional software or dependencies needed
+- Works offline once downloaded
+
+## Notes
+
+- The simulator assumes perfect island loops with all 41 clams untouched
+- Results represent idealized outcomes without player interference
+- Pearl images should be placed in the same directory as the HTML file (if using custom images)
+
+## File Structure
+
+```
+PearlSimulator/
+├── pearl_simulator.html  (Main application file)
+├── README.md             (This file)
+└── [pearl image files]   (Optional: black.png, gold.png, purple.png, etc.)
+```
+
+## Troubleshooting
+
+- **Images not showing?** Make sure the pearl image files (black.png, gold.png, etc.) are in the same folder as `pearl_simulator.html`
+- **Page not loading?** Try opening the HTML file with a different browser
+- **Results look incorrect?** Verify that your drop probability values sum to less than 1.0
