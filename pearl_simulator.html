@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>SAR Pearl Drop Simulator</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 50%, #16213e 100%);
+        color: #e8e8e8;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+        padding: 40px 20px;
+        min-height: 100vh;
+        line-height: 1.6;
+      }
+
+      h1 {
+        background: linear-gradient(135deg, #ffd369 0%, #ffb347 50%, #ffd369 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 40px;
+        letter-spacing: -0.5px;
+        text-shadow: 0 2px 20px rgba(255, 211, 105, 0.3);
+      }
+
+      h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 16px;
+        letter-spacing: 0.3px;
+      }
+
+      label {
+        display: block;
+        color: #b8b8b8;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-top: 12px;
+        margin-bottom: 2px;
+        letter-spacing: 0.2px;
+      }
+
+      label:first-of-type {
+        margin-top: 16px;
+      }
+
+      .config-box p {
+        margin-bottom: 20px;
+      }
+
+      br {
+        line-height: 0;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* TOP LAYOUT */
+      .top-layout {
+        display: flex;
+        gap: 24px;
+        margin-bottom: 40px;
+        flex-wrap: wrap;
+        max-width: 1400px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .config-box,
+      .summary-box {
+        background: rgba(30, 30, 45, 0.7);
+        backdrop-filter: blur(10px);
+        padding: 28px;
+        border-radius: 16px;
+        flex: 1;
+        min-width: 320px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4),
+                    0 2px 8px rgba(0, 0, 0, 0.2),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .config-box:hover,
+      .summary-box:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5),
+                    0 4px 12px rgba(0, 0, 0, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      }
+
+      .summary-box {
+        border: 1px solid rgba(255, 211, 105, 0.3);
+        background: linear-gradient(135deg, rgba(30, 30, 45, 0.8) 0%, rgba(40, 35, 55, 0.7) 100%);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4),
+                    0 2px 8px rgba(0, 0, 0, 0.2),
+                    0 0 0 1px rgba(255, 211, 105, 0.1),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      }
+
+      .summary-box:hover {
+        border-color: rgba(255, 211, 105, 0.5);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5),
+                    0 4px 12px rgba(0, 0, 0, 0.3),
+                    0 0 0 1px rgba(255, 211, 105, 0.2),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      }
+
+      /* DESCRIPTION */
+      .summary-title {
+        background: linear-gradient(135deg, #ffd369 0%, #ffb347 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 12px 0;
+      }
+
+      #description {
+        color: #c8c8c8;
+        font-size: 0.95rem;
+        line-height: 1.7;
+        margin-bottom: 20px;
+      }
+
+      #description strong {
+        color: #ffd369;
+        font-weight: 600;
+      }
+
+      /* CHART */
+      #chartWrapper {
+        margin: 20px 0;
+      }
+
+      canvas {
+        width: 100%;
+        height: 280px;
+        background: rgba(15, 15, 25, 0.6);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      /* INPUTS */
+      input[type="number"] {
+        width: 140px;
+        padding: 10px 14px;
+        margin: 0 0 4px 0;
+        background: rgba(20, 20, 30, 0.8);
+        border: 1.5px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        color: #ffd369;
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      input[type="number"]:hover {
+        border-color: rgba(255, 211, 105, 0.3);
+        background: rgba(25, 25, 35, 0.9);
+      }
+
+      input[type="number"]:focus {
+        border-color: #ffd369;
+        outline: none;
+        background: rgba(30, 30, 40, 0.95);
+        box-shadow: 0 0 0 3px rgba(255, 211, 105, 0.15),
+                    inset 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      button {
+        display: block;
+        background: linear-gradient(135deg, #ffd369 0%, #ffb347 100%);
+        color: #1a1a2e;
+        border: none;
+        padding: 12px 24px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(255, 211, 105, 0.3),
+                    0 2px 4px rgba(0, 0, 0, 0.2);
+        letter-spacing: 0.3px;
+        margin-top: 16px;
+      }
+
+      button:hover {
+        background: linear-gradient(135deg, #ffdf85 0%, #ffc266 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(255, 211, 105, 0.4),
+                    0 3px 6px rgba(0, 0, 0, 0.25);
+      }
+
+      button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(255, 211, 105, 0.3),
+                    0 1px 2px rgba(0, 0, 0, 0.2);
+      }
+
+      #scrollHint {
+        color: #ffd369;
+        margin-top: 12px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 0.7; }
+        50% { opacity: 1; }
+      }
+
+      /* RESULTS */
+      #results {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 20px;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .day-box {
+        background: rgba(30, 30, 45, 0.6);
+        backdrop-filter: blur(10px);
+        padding: 20px;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        transition: all 0.3s ease;
+      }
+
+      .day-box:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 211, 105, 0.2);
+      }
+
+      .day-box h3 {
+        background: linear-gradient(135deg, #ffd369 0%, #ffb347 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 10px 0;
+        font-size: 1.3rem;
+      }
+
+      .day-box small {
+        color: #999;
+        font-size: 0.85rem;
+        display: block;
+      }
+
+      .day-box p {
+        color: #bbb;
+        font-size: 0.9rem;
+        margin: 8px 0;
+      }
+
+      .pearls-grid {
+        display: grid;
+        row-gap: 12px;
+        margin-top: 12px;
+      }
+
+      .pearl {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        background: rgba(20, 20, 30, 0.5);
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.2s ease;
+      }
+
+      .pearl:hover {
+        background: rgba(25, 25, 35, 0.7);
+        border-color: rgba(255, 255, 255, 0.1);
+        transform: translateX(4px);
+      }
+
+      .pearl img {
+        width: 36px;
+        height: 36px;
+        margin-right: 10px;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+      }
+
+      .pearl span {
+        display: flex;
+        flex-direction: column;
+        color: #e0e0e0;
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+
+      .pearl-name {
+        color: #e0e0e0;
+        font-size: 0.95rem;
+        font-weight: 500;
+        margin-bottom: 2px;
+      }
+
+      .pearl small {
+        display: block;
+        color: #aaa;
+        font-size: 0.8rem;
+        margin-top: 2px;
+        font-weight: 400;
+        line-height: 1.4;
+      }
+
+      #totalSummary {
+        margin-top: 20px;
+      }
+
+      #totalSummary small {
+        color: #888;
+        font-style: italic;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Super Animal Royale – Pearl Drop Simulator</h1>
+
+    <div class="top-layout">
+      <!-- LEFT -->
+      <div class="config-box">
+        <h3>Simulation Settings</h3>
+        <p style="color: #dddddd; font-size: 14px; line-height: 1.4">
+          Set the number of clams per day and how many days to simulate. Adjust
+          the drop chances for each pearl color to see how your results change.
+        </p>
+
+        <label>Clams per day</label>
+        <input id="clamsPerDay" type="number" value="150" />
+
+        <label>Days to simulate</label>
+        <input id="daysToSim" type="number" value="50" />
+
+        <h3 style="margin-top: 32px;">Drop Chances</h3>
+        <p style="color: #dddddd; font-size: 14px; line-height: 1.4">
+          Adjust the probability (0-1) for each pearl type to drop from a clam.
+          These default values represent the rare drop rates.
+        </p>
+
+        <label>Black</label>
+        <input
+          id="pBlack"
+          type="number"
+          step="0.00001"
+          value="0.0001"
+        />
+        <label>Gold</label>
+        <input
+          id="pGold"
+          type="number"
+          step="0.00001"
+          value="0.001"
+        />
+        <label>Purple</label>
+        <input
+          id="pPurple"
+          type="number"
+          step="0.00001"
+          value="0.0139"
+        />
+        <label>Blue</label>
+        <input
+          id="pBlue"
+          type="number"
+          step="0.00001"
+          value="0.045"
+        />
+        <label>Green</label>
+        <input
+          id="pGreen"
+          type="number"
+          step="0.00001"
+          value="0.1"
+        />
+        <label>White</label>
+        <input
+          id="pWhite"
+          type="number"
+          step="0.00001"
+          value="0.4"
+        />
+
+        <button onclick="runSimulation()">Run Simulation</button>
+        <div
+          id="scrollHint"
+          style="color: #ffd369; margin-top: 6px; display: none"
+        >
+          ⬇ Scroll down to see results!
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="summary-box">
+        <h3 class="summary-title">Simulation Assumptions</h3>
+        <div id="description">
+          Each simulated day represents a <strong>perfect island loop</strong>:
+          all <strong>41 clams untouched</strong>, no interference from other
+          players, and uninterrupted routing. Results show idealized outcomes.
+        </div>
+
+        <div id="chartWrapper">
+          <canvas id="chart"></canvas>
+        </div>
+
+        <div id="totalSummary">
+          <small>Run a simulation to populate totals.</small>
+        </div>
+      </div>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+      const pearlImages = {
+        "Black Pearl": "black.png",
+        "Gold Pearl": "gold.png",
+        "Purple Pearl": "purple.png",
+        "Blue Pearl": "blue.png",
+        "Green Pearl": "green.png",
+        "White Pearl": "white.png",
+        "Empty Clam": "empty.png",
+      };
+
+      const pearlColors = {
+        "Black Pearl": "#333333",
+        "Gold Pearl": "#ffd369",
+        "Purple Pearl": "#a56cff",
+        "Blue Pearl": "#4aa3ff",
+        "Green Pearl": "#4aff78",
+        "White Pearl": "#e6e6e6",
+        "Empty Clam": "#666",
+      };
+
+      function getProbabilities() {
+        const keys = ["Black", "Gold", "Purple", "Blue", "Green", "White"];
+        let p = {},
+          sum = 0;
+        keys.forEach((k) => {
+          p[k] = parseFloat(document.getElementById("p" + k).value);
+          sum += p[k];
+        });
+        p.Empty = 1 - sum;
+        return p;
+      }
+
+      function rollOneClam() {
+        const p = getProbabilities();
+        let r = Math.random();
+
+        if (r < p.Black) return "Black Pearl";
+        r -= p.Black;
+        if (r < p.Gold) return "Gold Pearl";
+        r -= p.Gold;
+        if (r < p.Purple) return "Purple Pearl";
+        r -= p.Purple;
+        if (r < p.Blue) return "Blue Pearl";
+        r -= p.Blue;
+        if (r < p.Green) return "Green Pearl";
+        r -= p.Green;
+        if (r < p.White) return "White Pearl";
+        return "Empty Clam";
+      }
+
+      function drawChart(totals) {
+        try {
+          const c = document.getElementById("chart");
+          if (!c) {
+            console.error("Chart canvas not found");
+            return;
+          }
+          
+          const ctx = c.getContext("2d");
+          if (!ctx) {
+            console.error("Could not get canvas context");
+            return;
+          }
+          
+          // Get actual client dimensions
+          const displayWidth = Math.max(400, c.clientWidth || 400);
+          const displayHeight = Math.max(280, c.clientHeight || 280);
+          
+          // Reset canvas size to force clear (this also clears the canvas)
+          c.width = displayWidth;
+          c.height = displayHeight;
+          
+          // Explicitly clear the canvas (context is still valid after resize)
+          ctx.clearRect(0, 0, displayWidth, displayHeight);
+
+          // Always show all 6 pearl types in fixed order (rarest to most common)
+          const pearlOrder = [
+            "Black Pearl",
+            "Gold Pearl",
+            "Purple Pearl",
+            "Blue Pearl",
+            "Green Pearl",
+            "White Pearl"
+          ];
+          
+          // Get values for all pearls, defaulting to 0 if not present
+          const entries = pearlOrder.map((k) => {
+            const value = totals[k] || 0;
+            return [k, typeof value === 'number' ? value : 0];
+          });
+          
+          // Calculate max value, but ensure it's at least 1 to avoid division by zero
+          const values = entries.map((e) => {
+            const val = e[1];
+            return (typeof val === 'number' && !isNaN(val) && isFinite(val)) ? val : 0;
+          });
+          const max = Math.max(1, ...values);
+          
+          if (!isFinite(max) || max <= 0) {
+            console.error("Invalid max value:", max);
+            return;
+          }
+          
+          const padding = { top: 40, right: 20, bottom: 50, left: 50 };
+          const chartWidth = Math.max(0, displayWidth - padding.left - padding.right);
+          const chartHeight = Math.max(0, displayHeight - padding.top - padding.bottom);
+          const barWidth = Math.max(0, (chartWidth / 6) * 0.7);
+          const barSpacing = Math.max(0, chartWidth / 6);
+          
+          if (chartWidth <= 0 || chartHeight <= 0 || barWidth <= 0) {
+            console.error("Invalid chart dimensions:", { chartWidth, chartHeight, barWidth });
+            return;
+          }
+        
+        // Draw background
+        ctx.fillStyle = "rgba(15, 15, 25, 0.6)";
+        ctx.fillRect(0, 0, displayWidth, displayHeight);
+        
+        // Draw grid lines
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+        ctx.lineWidth = 1;
+        const gridLines = 5;
+        for (let i = 0; i <= gridLines; i++) {
+          const y = padding.top + (chartHeight / gridLines) * i;
+          ctx.beginPath();
+          ctx.moveTo(padding.left, y);
+          ctx.lineTo(displayWidth - padding.right, y);
+          ctx.stroke();
+          
+          // Y-axis labels
+          const value = max - (max / gridLines) * i;
+          ctx.fillStyle = "#aaa";
+          ctx.font = "11px sans-serif";
+          ctx.textAlign = "right";
+          ctx.fillText(Math.round(value).toLocaleString(), padding.left - 10, y + 4);
+        }
+        
+          // Draw bars - always show all 6 bars
+          entries.forEach(([k, v], i) => {
+            try {
+              const x = padding.left + i * barSpacing + (barSpacing - barWidth) / 2;
+              const numValue = typeof v === 'number' && !isNaN(v) ? v : 0;
+              let barHeight = (numValue / max) * chartHeight;
+              
+              // Ensure minimum visible height for all bars (even zero values)
+              const minHeight = 4;
+              if (barHeight < minHeight && numValue === 0) {
+                barHeight = 0; // Truly zero bars have no height
+              } else if (barHeight < minHeight && numValue > 0) {
+                barHeight = minHeight; // Non-zero bars have minimum visibility
+              }
+              
+              const y = padding.top + chartHeight - barHeight;
+              
+              // Draw bar with gradient - ensure color exists
+              const color = pearlColors[k] || "#888888";
+              if (barHeight > 0 && isFinite(barHeight) && isFinite(y)) {
+                const gradient = ctx.createLinearGradient(x, y, x, y + barHeight);
+                gradient.addColorStop(0, color + "ff");
+                gradient.addColorStop(1, color + "aa");
+                ctx.fillStyle = gradient;
+                ctx.fillRect(x, y, barWidth, barHeight);
+                
+                // Bar border
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, y, barWidth, barHeight);
+              } else {
+                // Draw a thin line for zero values
+                ctx.strokeStyle = color + "40";
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(x, padding.top + chartHeight);
+                ctx.lineTo(x + barWidth, padding.top + chartHeight);
+                ctx.stroke();
+              }
+              
+              // Value label on top of bar (always show, even for 0)
+              ctx.fillStyle = numValue > 0 ? "#fff" : "#888";
+              ctx.font = "bold 12px sans-serif";
+              ctx.textAlign = "center";
+              const labelY = barHeight > 0 ? y - 8 : padding.top + chartHeight - 8;
+              ctx.fillText(
+                numValue.toLocaleString(),
+                x + barWidth / 2,
+                labelY
+              );
+              
+              // X-axis label (pearl name)
+              ctx.fillStyle = numValue > 0 ? "#ccc" : "#666";
+              ctx.font = "11px sans-serif";
+              ctx.textAlign = "center";
+              const labelX = x + barWidth / 2;
+              const labelYBottom = displayHeight - padding.bottom + 20;
+              ctx.save();
+              ctx.translate(labelX, labelYBottom);
+              ctx.rotate(-Math.PI / 4);
+              ctx.fillText(k.replace(" Pearl", ""), 0, 0);
+              ctx.restore();
+            } catch (err) {
+              console.error(`Error drawing bar for ${k}:`, err);
+            }
+          });
+          
+          // Draw axis lines
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+          ctx.lineWidth = 2;
+          // X-axis
+          ctx.beginPath();
+          ctx.moveTo(padding.left, padding.top + chartHeight);
+          ctx.lineTo(displayWidth - padding.right, padding.top + chartHeight);
+          ctx.stroke();
+          // Y-axis
+          ctx.beginPath();
+          ctx.moveTo(padding.left, padding.top);
+          ctx.lineTo(padding.left, padding.top + chartHeight);
+          ctx.stroke();
+        } catch (error) {
+          console.error("Error drawing chart:", error);
+        }
+      }
+
+      function runSimulation() {
+        // Get DOM elements
+        const resultsEl = document.getElementById("results");
+        const totalSummaryEl = document.getElementById("totalSummary");
+        const scrollHintEl = document.getElementById("scrollHint");
+        
+        // Show scroll hint
+        if (scrollHintEl) scrollHintEl.style.display = "block";
+
+        // Clear previous results
+        if (resultsEl) resultsEl.innerHTML = "";
+        if (totalSummaryEl) totalSummaryEl.innerHTML = '<small>Run a simulation to populate totals.</small>';
+        
+        // Reset totals
+        let totals = {};
+        Object.keys(pearlImages).forEach((k) => (totals[k] = 0));
+
+        const clams = +clamsPerDay.value;
+        const days = +daysToSim.value;
+
+        const circles = clams / 41;
+        const minutesPerDay = (clams / 41) * 5;
+
+        const pearlOrder = [
+          "Empty Clam",
+          "White Pearl",
+          "Green Pearl",
+          "Blue Pearl",
+          "Purple Pearl",
+          "Gold Pearl",
+          "Black Pearl",
+        ];
+
+        for (let d = 1; d <= days; d++) {
+          let day = {};
+
+          for (let i = 0; i < clams; i++) {
+            const r = rollOneClam();
+            day[r] = (day[r] || 0) + 1;
+            totals[r]++;
+          }
+
+          // 🔹 BUILD DAY CARD
+          let card = `
+      <div class="day-box">
+        <h3>Day ${d}</h3>
+        <small>Circles: ${circles.toFixed(2)} | Time: ${minutesPerDay.toFixed(2)} min</small>
+        <div class="pearls-grid">
+    `;
+
+          for (let k of pearlOrder) {
+            if (!day[k]) continue;
+            card += `
+        <div class="pearl">
+          <img src="${pearlImages[k]}">
+          <span>${k}: ${day[k]}</span>
+        </div>`;
+          }
+
+          card += `</div></div>`;
+          if (resultsEl) resultsEl.innerHTML += card;
+        }
+
+        // 🔹 DRAW CHART (with a small delay to ensure canvas is ready)
+        setTimeout(() => {
+          drawChart(totals);
+        }, 50);
+
+        // 🔹 TOTAL SUMMARY
+        let totalClams = clams * days;
+        let totalCircles = (clams / 41) * days;
+        let totalMinutes = totalCircles * 5;
+        let totalHours = (totalMinutes / 60).toFixed(2);
+
+        let totalHTML = `
+    <div class="day-box">
+      <h3>Total Across All Days</h3>
+      <p><small>Total circles: ${totalCircles.toFixed(2)}</small></p>
+      <p><small>Total time: ${totalMinutes.toFixed(2)} minutes (${totalHours} hours)</small></p>
+      <p><small>Total clams opened: ${totalClams}</small></p>
+      <div class="pearls-grid">
+  `;
+
+        for (let k of pearlOrder) {
+          const count = totals[k];
+          const percent = ((count / totalClams) * 100).toFixed(3);
+          const avgPerDay = (count / days).toFixed(2);
+          totalHTML += `
+      <div class="pearl">
+        <img src="${pearlImages[k]}" alt="${k}">
+        <span>
+          <div class="pearl-name">${k}: ${count}</div>
+          <small>${percent}% of all clams</small>
+          <small>Average drops per day: ${avgPerDay}</small>
+        </span>
+      </div>
+    `;
+        }
+
+        totalHTML += "</div></div>";
+        if (totalSummaryEl) totalSummaryEl.innerHTML = totalHTML;
+      }
+    </script>
+  </body>
+</html>
