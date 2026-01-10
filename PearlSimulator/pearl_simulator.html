@@ -409,6 +409,8 @@
         justify-content: center;
         border-radius: 6px;
         transition: all 0.2s ease;
+        box-shadow: none;
+        text-shadow: none;
       }
 
       .pearl-modal-close:hover {
@@ -1868,8 +1870,19 @@
 
       function closePearlModal() {
         const modal = document.getElementById("pearlModal");
+        const modalTitle = document.getElementById("modalTitle");
+        const modalContent = document.getElementById("modalContent");
+        
         if (modal) {
           modal.classList.remove("active");
+        }
+        
+        // Clear modal content to prevent lag
+        if (modalTitle) {
+          modalTitle.textContent = "";
+        }
+        if (modalContent) {
+          modalContent.innerHTML = "";
         }
       }
 
