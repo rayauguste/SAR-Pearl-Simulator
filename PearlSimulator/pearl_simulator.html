@@ -195,8 +195,8 @@
         background: linear-gradient(135deg, #ffd369 0%, #ffb347 100%);
         color: #1a1a2e;
         border: none;
-        padding: 12px 24px;
-        font-size: 1rem;
+        padding: 16px 32px;
+        font-size: 1.15rem;
         font-weight: 600;
         border-radius: 10px;
         cursor: pointer;
@@ -204,7 +204,8 @@
         box-shadow: 0 4px 12px rgba(255, 211, 105, 0.3),
                     0 2px 4px rgba(0, 0, 0, 0.2);
         letter-spacing: 0.3px;
-        margin-top: 16px;
+        margin-top: 20px;
+        width: 100%;
       }
 
       button:hover {
@@ -349,6 +350,12 @@
     <h1>Super Animal Royale – Pearl Drop Simulator</h1>
 
     <div class="top-layout">
+      <div id="description" style="background: rgba(30, 30, 45, 0.6); padding: 16px 24px; border-radius: 12px; margin-bottom: 20px; border: 1px solid rgba(255, 211, 105, 0.2); color: #c8c8c8; font-size: 0.95rem; line-height: 1.6;">
+        <strong style="color: #ffd369;">Note:</strong> Each simulated day represents a <strong>perfect island loop</strong>:
+        all <strong>41 clams untouched</strong>, no interference from other
+        players, and uninterrupted routing. Results show idealized outcomes.
+      </div>
+
       <div class="combined-box">
         <!-- LEFT: Settings -->
         <div class="config-section">
@@ -409,14 +416,12 @@
         <!-- MIDDLE: Chart -->
         <div class="chart-section">
           <h3 class="summary-title">Results Chart</h3>
-          <div id="description" style="margin-bottom: 16px;">
-          Each simulated day represents a <strong>perfect island loop</strong>:
-          all <strong>41 clams untouched</strong>, no interference from other
-          players, and uninterrupted routing. Results show idealized outcomes.
-        </div>
-
-        <div id="chartWrapper">
-          <canvas id="chart"></canvas>
+          <p style="color: #c8c8c8; font-size: 0.9rem; line-height: 1.6; margin-bottom: 16px;">
+            This chart shows the total number of each pearl type (and empty clams) across all simulated days. 
+            The taller the bar, the more drops you received.
+          </p>
+          <div id="chartWrapper">
+            <canvas id="chart"></canvas>
           </div>
         </div>
 
@@ -483,6 +488,24 @@
         return "Empty Clam";
       }
 
+      // Helper function to convert hex color to rgba
+      function hexToRgba(hex, alpha) {
+        // Remove # if present
+        hex = hex.replace('#', '');
+        
+        // Handle 3-digit hex colors
+        if (hex.length === 3) {
+          hex = hex.split('').map(char => char + char).join('');
+        }
+        
+        // Parse hex to RGB
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+
       function drawChart(totals) {
         try {
         const c = document.getElementById("chart");
@@ -508,14 +531,15 @@
           // Explicitly clear the canvas (context is still valid after resize)
           ctx.clearRect(0, 0, displayWidth, displayHeight);
 
-          // Always show all 6 pearl types in fixed order (rarest to most common)
+          // Always show all pearl types + empty clams in fixed order (rarest to most common)
           const pearlOrder = [
             "Black Pearl",
             "Gold Pearl",
             "Purple Pearl",
             "Blue Pearl",
             "Green Pearl",
-            "White Pearl"
+            "White Pearl",
+            "Empty Clam"
           ];
           
           // Get values for all pearls, defaulting to 0 if not present
@@ -539,8 +563,9 @@
           const padding = { top: 40, right: 20, bottom: 50, left: 50 };
           const chartWidth = Math.max(0, displayWidth - padding.left - padding.right);
           const chartHeight = Math.max(0, displayHeight - padding.top - padding.bottom);
-          const barWidth = Math.max(0, (chartWidth / 6) * 0.7);
-          const barSpacing = Math.max(0, chartWidth / 6);
+          const numBars = pearlOrder.length; // 7 bars (6 pearls + empty clams)
+          const barWidth = Math.max(0, (chartWidth / numBars) * 0.7);
+          const barSpacing = Math.max(0, chartWidth / numBars);
           
           if (chartWidth <= 0 || chartHeight <= 0 || barWidth <= 0) {
             console.error("Invalid chart dimensions:", { chartWidth, chartHeight, barWidth });
@@ -570,8 +595,8 @@
           ctx.fillText(Math.round(value).toLocaleString(), padding.left - 10, y + 4);
         }
 
-          // Draw bars - always show all 6 bars
-        entries.forEach(([k, v], i) => {
+          // Draw bars - always show all bars (6 pearl types + empty clams)
+          entries.forEach(([k, v], i) => {
             try {
               const x = padding.left + i * barSpacing + (barSpacing - barWidth) / 2;
               const numValue = typeof v === 'number' && !isNaN(v) ? v : 0;
@@ -591,8 +616,8 @@
               const color = pearlColors[k] || "#888888";
               if (barHeight > 0 && isFinite(barHeight) && isFinite(y)) {
                 const gradient = ctx.createLinearGradient(x, y, x, y + barHeight);
-                gradient.addColorStop(0, color + "ff");
-                gradient.addColorStop(1, color + "aa");
+                gradient.addColorStop(0, hexToRgba(color, 1.0)); // Full opacity at top
+                gradient.addColorStop(1, hexToRgba(color, 0.67)); // ~67% opacity at bottom (aa in hex)
                 ctx.fillStyle = gradient;
                 ctx.fillRect(x, y, barWidth, barHeight);
                 
@@ -602,12 +627,12 @@
                 ctx.strokeRect(x, y, barWidth, barHeight);
               } else {
                 // Draw a thin line for zero values
-                ctx.strokeStyle = color + "40";
+                ctx.strokeStyle = hexToRgba(color, 0.25); // ~25% opacity (40 in hex)
                 ctx.lineWidth = 1;
-          ctx.beginPath();
+                ctx.beginPath();
                 ctx.moveTo(x, padding.top + chartHeight);
                 ctx.lineTo(x + barWidth, padding.top + chartHeight);
-          ctx.stroke();
+                ctx.stroke();
               }
               
               // Value label on top of bar (always show, even for 0)
