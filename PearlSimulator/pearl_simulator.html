@@ -512,10 +512,11 @@
         color: #ffd369;
         transition: transform 0.3s ease;
         font-weight: bold;
+        transform: rotate(180deg);
       }
 
       .collapsible-toggle.collapsed {
-        transform: rotate(-90deg);
+        transform: rotate(0deg);
       }
 
       .collapsible-content {
@@ -713,6 +714,7 @@
         border-radius: 6px;
         cursor: pointer;
         transition: background 0.2s;
+        user-select: none;
       }
 
       .pearl-filter-item:hover {
@@ -724,6 +726,8 @@
         height: 18px;
         cursor: pointer;
         accent-color: #ffd369;
+        pointer-events: auto;
+        flex-shrink: 0;
       }
 
       .pearl-filter-item label {
@@ -734,6 +738,7 @@
         display: flex;
         align-items: center;
         gap: 6px;
+        margin: 0;
       }
 
       .pearl-filter-item img {
@@ -752,6 +757,7 @@
 
       #searchFilterToggle {
         user-select: none;
+        transform: rotate(0deg);
       }
 
       #searchFilterToggle.rotated {
@@ -796,7 +802,7 @@
         <div style="margin-top: 24px;">
           <div class="collapsible-header" onclick="toggleDropChances()">
             <h3 style="margin: 0;">Drop Chances (Optional)</h3>
-            <span id="dropChancesToggle" class="collapsible-toggle">▼</span>
+            <span id="dropChancesToggle" class="collapsible-toggle collapsed">▼</span>
           </div>
           <div id="dropChancesContent" class="collapsible-content collapsed">
             <p style="color: #dddddd; font-size: 14px; line-height: 1.4; margin-bottom: 16px; margin-top: 12px;">
@@ -861,7 +867,7 @@
     </div>
 
     <!-- Search and Filter Section -->
-    <div id="searchFilterSection" style="display: none; margin: 20px auto; max-width: 1200px; background: rgba(20, 20, 30, 0.6); border-radius: 12px; border: 1px solid rgba(255, 211, 105, 0.2); overflow: hidden;">
+    <div id="searchFilterSection" style="display: none; margin: 20px auto; max-width: 1400px; background: rgba(20, 20, 30, 0.6); border-radius: 12px; border: 1px solid rgba(255, 211, 105, 0.2); overflow: hidden;">
       <div id="searchFilterHeader" onclick="toggleSearchFilter()" style="padding: 12px 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: rgba(30, 30, 45, 0.5); transition: background 0.2s;" onmouseover="this.style.background='rgba(35, 35, 50, 0.6)'" onmouseout="this.style.background='rgba(30, 30, 45, 0.5)'">
         <h3 style="color: #ffd369; margin: 0; font-size: 1rem; font-weight: normal;">Search & Filter Results</h3>
         <span id="searchFilterToggle" style="color: #ffd369; font-size: 1.2rem; transition: transform 0.2s;">▼</span>
@@ -1412,16 +1418,18 @@
           }
 
           // Add event listeners to handle tooltip priority
-          // Hide day-box tooltips when hovering over pearl items
+          // Hide day-box tooltips when hovering anywhere in the pearls-grid area
           setTimeout(() => {
-            const allPearls = document.querySelectorAll('.pearl[data-tooltip]');
-            allPearls.forEach(pearl => {
-              const dayBox = pearl.closest('.day-box');
+            const allPearlsGrids = document.querySelectorAll('.pearls-grid');
+            allPearlsGrids.forEach(grid => {
+              const dayBox = grid.closest('.day-box');
               if (dayBox) {
-                pearl.addEventListener('mouseenter', () => {
+                // Hide day-box tooltip when entering pearls-grid area
+                grid.addEventListener('mouseenter', () => {
                   dayBox.classList.add('pearl-hovered');
                 });
-                pearl.addEventListener('mouseleave', () => {
+                // Show day-box tooltip again when leaving pearls-grid area
+                grid.addEventListener('mouseleave', () => {
                   dayBox.classList.remove('pearl-hovered');
                 });
               }
@@ -1515,6 +1523,18 @@
           const label = document.createElement("label");
           label.htmlFor = checkbox.id;
           label.innerHTML = `<img src="${pearlImages[pearlType]}" alt="${pearlType}">${pearlType}`;
+          
+          // Make entire filter item clickable - clicking anywhere toggles the checkbox
+          filterItem.addEventListener('click', (e) => {
+            // If clicking directly on checkbox, let its native behavior handle it (change event will fire)
+            if (e.target === checkbox) {
+              return; // Checkbox change event listener will handle filterResults
+            }
+            // Toggle checkbox when clicking anywhere else on the item (label, image, padding, etc.)
+            e.preventDefault();
+            checkbox.checked = !checkbox.checked;
+            filterResults();
+          });
           
           filterItem.appendChild(checkbox);
           filterItem.appendChild(label);
