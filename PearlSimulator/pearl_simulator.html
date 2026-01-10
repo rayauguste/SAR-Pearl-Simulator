@@ -352,79 +352,79 @@
       <div class="combined-box">
         <!-- LEFT: Settings -->
         <div class="config-section">
-          <h3>Simulation Settings</h3>
+        <h3>Simulation Settings</h3>
           <p style="color: #dddddd; font-size: 14px; line-height: 1.4; margin-bottom: 20px">
-            Set the number of clams per day and how many days to simulate. Adjust
-            the drop chances for each pearl color to see how your results change.
-          </p>
+          Set the number of clams per day and how many days to simulate. Adjust
+          the drop chances for each pearl color to see how your results change.
+        </p>
 
-          <label>Clams per day</label>
-          <input id="clamsPerDay" type="number" value="150" />
+        <label>Clams per day</label>
+        <input id="clamsPerDay" type="number" value="150" />
 
-          <label>Days to simulate</label>
-          <input id="daysToSim" type="number" value="50" />
+        <label>Days to simulate</label>
+        <input id="daysToSim" type="number" value="50" />
 
           <h3 style="margin-top: 24px; margin-bottom: 12px;">Drop Chances</h3>
           <p style="color: #dddddd; font-size: 14px; line-height: 1.4; margin-bottom: 16px">
-            Adjust the probability (0-1) for each pearl type to drop from a clam.
-            These default values represent the rare drop rates.
-          </p>
+          Adjust the probability (0-1) for each pearl type to drop from a clam.
+          These default values represent the rare drop rates.
+        </p>
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px;">
             <div>
-              <label>Black</label>
+        <label>Black</label>
               <input id="pBlack" type="number" step="0.00001" value="0.0001" />
             </div>
             <div>
-              <label>Gold</label>
+        <label>Gold</label>
               <input id="pGold" type="number" step="0.00001" value="0.001" />
             </div>
             <div>
-              <label>Purple</label>
+        <label>Purple</label>
               <input id="pPurple" type="number" step="0.00001" value="0.0139" />
             </div>
             <div>
-              <label>Blue</label>
+        <label>Blue</label>
               <input id="pBlue" type="number" step="0.00001" value="0.045" />
             </div>
             <div>
-              <label>Green</label>
+        <label>Green</label>
               <input id="pGreen" type="number" step="0.00001" value="0.1" />
             </div>
             <div>
-              <label>White</label>
+        <label>White</label>
               <input id="pWhite" type="number" step="0.00001" value="0.4" />
             </div>
           </div>
 
-          <button onclick="runSimulation()">Run Simulation</button>
-          <div
-            id="scrollHint"
-            style="color: #ffd369; margin-top: 6px; display: none"
-          >
-            ⬇ Scroll down to see results!
-          </div>
+        <button onclick="runSimulation()">Run Simulation</button>
+        <div
+          id="scrollHint"
+          style="color: #ffd369; margin-top: 6px; display: none"
+        >
+          ⬇ Scroll down to see results!
         </div>
+      </div>
 
         <!-- MIDDLE: Chart -->
         <div class="chart-section">
           <h3 class="summary-title">Results Chart</h3>
           <div id="description" style="margin-bottom: 16px;">
-            Each simulated day represents a <strong>perfect island loop</strong>:
-            all <strong>41 clams untouched</strong>, no interference from other
-            players, and uninterrupted routing. Results show idealized outcomes.
-          </div>
+          Each simulated day represents a <strong>perfect island loop</strong>:
+          all <strong>41 clams untouched</strong>, no interference from other
+          players, and uninterrupted routing. Results show idealized outcomes.
+        </div>
 
-          <div id="chartWrapper">
-            <canvas id="chart"></canvas>
+        <div id="chartWrapper">
+          <canvas id="chart"></canvas>
           </div>
         </div>
 
         <!-- RIGHT: Summary -->
         <div class="summary-section">
           <h3 class="summary-title">Total Summary</h3>
-          <div id="totalSummary">
-            <small>Run a simulation to populate totals.</small>
+        <div id="totalSummary">
+          <small>Run a simulation to populate totals.</small>
           </div>
         </div>
       </div>
@@ -485,13 +485,13 @@
 
       function drawChart(totals) {
         try {
-          const c = document.getElementById("chart");
+        const c = document.getElementById("chart");
           if (!c) {
             console.error("Chart canvas not found");
             return;
           }
           
-          const ctx = c.getContext("2d");
+        const ctx = c.getContext("2d");
           if (!ctx) {
             console.error("Could not get canvas context");
             return;
@@ -561,7 +561,7 @@
           ctx.moveTo(padding.left, y);
           ctx.lineTo(displayWidth - padding.right, y);
           ctx.stroke();
-          
+
           // Y-axis labels
           const value = max - (max / gridLines) * i;
           ctx.fillStyle = "#aaa";
@@ -569,9 +569,9 @@
           ctx.textAlign = "right";
           ctx.fillText(Math.round(value).toLocaleString(), padding.left - 10, y + 4);
         }
-        
+
           // Draw bars - always show all 6 bars
-          entries.forEach(([k, v], i) => {
+        entries.forEach(([k, v], i) => {
             try {
               const x = padding.left + i * barSpacing + (barSpacing - barWidth) / 2;
               const numValue = typeof v === 'number' && !isNaN(v) ? v : 0;
@@ -598,16 +598,16 @@
                 
                 // Bar border
                 ctx.strokeStyle = color;
-                ctx.lineWidth = 2;
+          ctx.lineWidth = 2;
                 ctx.strokeRect(x, y, barWidth, barHeight);
               } else {
                 // Draw a thin line for zero values
                 ctx.strokeStyle = color + "40";
                 ctx.lineWidth = 1;
-                ctx.beginPath();
+          ctx.beginPath();
                 ctx.moveTo(x, padding.top + chartHeight);
                 ctx.lineTo(x + barWidth, padding.top + chartHeight);
-                ctx.stroke();
+          ctx.stroke();
               }
               
               // Value label on top of bar (always show, even for 0)
@@ -720,7 +720,7 @@
 
         // 🔹 DRAW CHART (with a small delay to ensure canvas is ready)
         setTimeout(() => {
-          drawChart(totals);
+        drawChart(totals);
         }, 50);
 
         // 🔹 TOTAL SUMMARY
