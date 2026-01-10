@@ -765,6 +765,48 @@
       #searchFilterToggle.rotated {
         transform: rotate(180deg);
       }
+
+      /* Scroll to Top Button */
+      #scrollToTop {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 211, 105, 0.9);
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 211, 105, 0.5);
+        border-radius: 50%;
+        cursor: pointer;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        padding: 0;
+        margin: 0;
+      }
+
+      #scrollToTop:hover {
+        background: rgba(255, 211, 105, 1);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+      }
+
+      #scrollToTop.active {
+        display: flex;
+      }
+
+      #scrollToTop::before {
+        content: '';
+        width: 0;
+        height: 0;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-bottom: 12px solid #1a1a2e;
+        margin-top: -4px;
+      }
     </style>
   </head>
 
@@ -808,33 +850,33 @@
           </div>
           <div id="dropChancesContent" class="collapsible-content collapsed">
             <p style="color: #dddddd; font-size: 14px; line-height: 1.4; margin-bottom: 16px; margin-top: 12px;">
-              Adjust the probability (0-1) for each pearl type to drop from a clam.
-              These default values represent the rare drop rates.
-            </p>
+          Adjust the probability (0-1) for each pearl type to drop from a clam.
+          These default values represent the rare drop rates.
+        </p>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px;">
               <div>
-                <label>Black</label>
+        <label>Black</label>
                 <input id="pBlack" type="number" step="0.00001" value="0.0001" />
               </div>
               <div>
-                <label>Gold</label>
+        <label>Gold</label>
                 <input id="pGold" type="number" step="0.00001" value="0.001" />
               </div>
               <div>
-                <label>Purple</label>
+        <label>Purple</label>
                 <input id="pPurple" type="number" step="0.00001" value="0.0139" />
               </div>
               <div>
-                <label>Blue</label>
+        <label>Blue</label>
                 <input id="pBlue" type="number" step="0.00001" value="0.045" />
               </div>
               <div>
-                <label>Green</label>
+        <label>Green</label>
                 <input id="pGreen" type="number" step="0.00001" value="0.1" />
               </div>
               <div>
-                <label>White</label>
+        <label>White</label>
                 <input id="pWhite" type="number" step="0.00001" value="0.4" />
               </div>
             </div>
@@ -859,21 +901,21 @@
           </p>
           <div id="totalSummary" style="margin-bottom: 16px;">
             <small>Run a simulation to populate totals.</small>
-          </div>
+        </div>
         <div id="chartWrapper">
           <canvas id="chart"></canvas>
           <div id="chartTooltip" class="chart-tooltip"></div>
         </div>
         </div>
       </div>
-    </div>
+        </div>
 
     <!-- Search and Filter Section -->
     <div id="searchFilterSection" style="display: none; margin: 20px auto; max-width: 1400px; background: rgba(20, 20, 30, 0.6); border-radius: 12px; border: 1px solid rgba(255, 211, 105, 0.2); overflow: hidden;">
       <div id="searchFilterHeader" onclick="toggleSearchFilter()" style="padding: 12px 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: rgba(30, 30, 45, 0.5); transition: background 0.2s;" onmouseover="this.style.background='rgba(35, 35, 50, 0.6)'" onmouseout="this.style.background='rgba(30, 30, 45, 0.5)'">
         <h3 style="color: #ffd369; margin: 0; font-size: 1rem; font-weight: normal;">Search & Filter Results</h3>
         <span id="searchFilterToggle" style="color: #ffd369; font-size: 1.2rem; transition: transform 0.2s;">▼</span>
-      </div>
+        </div>
       
       <div id="searchFilterContent" style="display: none; padding: 16px;">
         <!-- Search Bar -->
@@ -911,6 +953,9 @@
         <div id="modalContent"></div>
       </div>
     </div>
+
+    <!-- Scroll to Top Button -->
+    <button id="scrollToTop" aria-label="Scroll to top"></button>
 
     <script>
       const pearlImages = {
@@ -1310,7 +1355,7 @@
         
         // Use setTimeout to allow UI to update with loading animation
         setTimeout(() => {
-          // Show scroll hint
+        // Show scroll hint
           if (scrollHintEl) scrollHintEl.style.display = "block";
 
           // Clear previous results (loading animation will be replaced)
@@ -1318,10 +1363,10 @@
           if (totalSummaryEl) totalSummaryEl.innerHTML = '<small>Run a simulation to populate totals.</small>';
         
           // Reset totals
-          let totals = {};
-          Object.keys(pearlImages).forEach((k) => (totals[k] = 0));
+        let totals = {};
+        Object.keys(pearlImages).forEach((k) => (totals[k] = 0));
 
-          const clams = +clamsPerDay.value;
+        const clams = +clamsPerDay.value;
           let days = +daysToSim.value;
           
           // Validate days: must be between 1 and 365
@@ -1334,32 +1379,32 @@
           const laps = clams / 41;
           const minutesPerDay = (clams / 41) * 5;
 
-          const pearlOrder = [
-            "Empty Clam",
-            "White Pearl",
-            "Green Pearl",
-            "Blue Pearl",
-            "Purple Pearl",
-            "Gold Pearl",
-            "Black Pearl",
-          ];
+        const pearlOrder = [
+          "Empty Clam",
+          "White Pearl",
+          "Green Pearl",
+          "Blue Pearl",
+          "Purple Pearl",
+          "Gold Pearl",
+          "Black Pearl",
+        ];
 
           // Store timing data for each pearl type by day
           const pearlTimingData = {};
           // Store all drops in chronological order for each day
           const dayChronologicalData = {};
 
-          for (let d = 1; d <= days; d++) {
-            let day = {};
+        for (let d = 1; d <= days; d++) {
+          let day = {};
             // Track when each pearl was obtained this day
             const dayPearlTimings = {};
             // Track all drops in chronological order for this day
             const chronologicalDrops = [];
 
-            for (let i = 0; i < clams; i++) {
-              const r = rollOneClam();
-              day[r] = (day[r] || 0) + 1;
-              totals[r]++;
+          for (let i = 0; i < clams; i++) {
+            const r = rollOneClam();
+            day[r] = (day[r] || 0) + 1;
+            totals[r]++;
               
               // Track timing for each pearl drop
               if (!dayPearlTimings[r]) {
@@ -1386,7 +1431,7 @@
             pearlTimingData[d] = dayPearlTimings;
             dayChronologicalData[d] = chronologicalDrops;
 
-            // 🔹 BUILD DAY CARD
+          // 🔹 BUILD DAY CARD
             // Calculate total drops for this day for tooltip
             const totalDayDrops = Object.values(day).reduce((a, b) => a + b, 0);
             const dayTooltip = `Day ${d}: ${totalDayDrops} total drops across ${Object.keys(day).length} types. Click to see all drops in order.`;
@@ -1394,28 +1439,28 @@
             // Create comma-separated list of pearl types for filtering
             const pearlTypesInDay = Object.keys(day).join(',');
             
-            let card = `
+          let card = `
       <div class="day-box" data-day="${d}" data-pearl-types="${pearlTypesInDay}" onclick="showDayTiming(${d})" style="cursor: pointer;" data-tooltip="${dayTooltip.replace(/"/g, '&quot;')}">
         <h3>Day ${d}</h3>
         <small>Laps: ${laps.toFixed(2)} | Time: ${minutesPerDay.toFixed(2)} min</small>
         <div class="pearls-grid">
     `;
 
-            for (let k of pearlOrder) {
-              if (!day[k]) continue;
+          for (let k of pearlOrder) {
+            if (!day[k]) continue;
               const pearlKey = `day-${d}-${k}`;
               const count = day[k];
               const percent = totalDayDrops > 0 ? ((count / totalDayDrops) * 100).toFixed(1) : "0";
               const pearlTooltip = `${k}: ${count} drop${count === 1 ? '' : 's'} on Day ${d} (${percent}% of this day's drops). Click for timing details.`;
               
-              card += `
+            card += `
         <div class="pearl" onclick="event.stopPropagation(); showPearlTiming(${d}, '${k.replace(/'/g, "\\'")}')" data-pearl-type="${k}" data-day="${d}" data-tooltip="${pearlTooltip.replace(/"/g, '&quot;')}">
           <img src="${pearlImages[k]}">
           <span>${k}: ${day[k]}</span>
         </div>`;
-            }
+          }
 
-            card += `</div></div>`;
+          card += `</div></div>`;
             if (resultsEl) resultsEl.innerHTML += card;
           }
 
@@ -1451,13 +1496,13 @@
             drawChart(totals, days);
           }, 50);
 
-          // 🔹 TOTAL SUMMARY
-          let totalClams = clams * days;
+        // 🔹 TOTAL SUMMARY
+        let totalClams = clams * days;
           let totalLaps = (clams / 41) * days;
           let totalMinutes = totalLaps * 5;
-          let totalHours = (totalMinutes / 60).toFixed(2);
+        let totalHours = (totalMinutes / 60).toFixed(2);
 
-          let totalHTML = `
+        let totalHTML = `
             <div onclick="showAllDaysTiming()" style="background: rgba(20, 20, 30, 0.6); padding: 16px; border-radius: 8px; margin-top: 16px; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(25, 25, 35, 0.7)'" onmouseout="this.style.background='rgba(20, 20, 30, 0.6)'">
               <h4 style="color: #ffd369; margin: 0 0 12px 0; font-size: 1.1rem;">Summary <small style="color: #aaa; font-size: 0.8rem; font-weight: normal;">(Click to see all drops)</small></h4>
               <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
@@ -1900,6 +1945,28 @@
           closePearlModal();
         }
       });
+
+      // Scroll to Top Button
+      const scrollToTopBtn = document.getElementById("scrollToTop");
+      
+      if (scrollToTopBtn) {
+        function toggleScrollToTop() {
+          if (window.scrollY > 300) {
+            scrollToTopBtn.classList.add("active");
+          } else {
+            scrollToTopBtn.classList.remove("active");
+          }
+        }
+
+        window.addEventListener("scroll", toggleScrollToTop);
+        
+        scrollToTopBtn.addEventListener("click", function() {
+          window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+          });
+        });
+      }
     </script>
   </body>
 </html>
