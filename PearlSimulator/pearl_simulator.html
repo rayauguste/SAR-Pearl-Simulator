@@ -587,6 +587,90 @@
         z-index: 1001;
         pointer-events: none;
       }
+
+      /* Day and Pearl Tooltips */
+      .day-box[data-tooltip],
+      .pearl[data-tooltip] {
+        position: relative;
+      }
+
+      .day-box[data-tooltip]:hover::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: calc(100% + 10px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(30, 30, 45, 0.98);
+        backdrop-filter: blur(10px);
+        padding: 12px 16px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 211, 105, 0.3);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        color: #ddd;
+        font-size: 0.85rem;
+        line-height: 1.6;
+        white-space: normal;
+        max-width: 320px;
+        min-width: 200px;
+        z-index: 1000;
+        pointer-events: none;
+        font-weight: normal;
+        text-align: left;
+      }
+
+      .pearl[data-tooltip]:hover::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: calc(100% + 10px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(30, 30, 45, 0.98);
+        backdrop-filter: blur(10px);
+        padding: 12px 16px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 211, 105, 0.3);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        color: #ddd;
+        font-size: 0.85rem;
+        line-height: 1.6;
+        white-space: normal;
+        max-width: 320px;
+        min-width: 200px;
+        z-index: 1002;
+        pointer-events: none;
+        font-weight: normal;
+        text-align: left;
+      }
+
+      .day-box[data-tooltip]:hover::before {
+        content: "";
+        position: absolute;
+        bottom: calc(100% + 4px);
+        left: 50%;
+        transform: translateX(-50%);
+        border: 6px solid transparent;
+        border-bottom-color: rgba(255, 211, 105, 0.3);
+        z-index: 1001;
+        pointer-events: none;
+      }
+
+      .pearl[data-tooltip]:hover::before {
+        content: "";
+        position: absolute;
+        bottom: calc(100% + 4px);
+        left: 50%;
+        transform: translateX(-50%);
+        border: 6px solid transparent;
+        border-bottom-color: rgba(255, 211, 105, 0.3);
+        z-index: 1003;
+        pointer-events: none;
+      }
+
+      /* Hide day-box tooltip when pearl is hovered */
+      .day-box.pearl-hovered::after,
+      .day-box.pearl-hovered::before {
+        display: none !important;
+      }
     </style>
   </head>
 
@@ -1145,8 +1229,12 @@
           dayChronologicalData[d] = chronologicalDrops;
 
           // 🔹 BUILD DAY CARD
+          // Calculate total drops for this day for tooltip
+          const totalDayDrops = Object.values(day).reduce((a, b) => a + b, 0);
+          const dayTooltip = `Day ${d}: ${totalDayDrops} total drops across ${Object.keys(day).length} types. Click to see all drops in order.`;
+          
           let card = `
-      <div class="day-box" data-day="${d}" onclick="showDayTiming(${d})" style="cursor: pointer;">
+      <div class="day-box" data-day="${d}" onclick="showDayTiming(${d})" style="cursor: pointer;" data-tooltip="${dayTooltip.replace(/"/g, '&quot;')}">
         <h3>Day ${d}</h3>
         <small>Laps: ${laps.toFixed(2)} | Time: ${minutesPerDay.toFixed(2)} min</small>
         <div class="pearls-grid">
@@ -1155,8 +1243,12 @@
           for (let k of pearlOrder) {
             if (!day[k]) continue;
             const pearlKey = `day-${d}-${k}`;
+            const count = day[k];
+            const percent = totalDayDrops > 0 ? ((count / totalDayDrops) * 100).toFixed(1) : "0";
+            const pearlTooltip = `${k}: ${count} drop${count === 1 ? '' : 's'} on Day ${d} (${percent}% of this day's drops). Click for timing details.`;
+            
             card += `
-        <div class="pearl" onclick="event.stopPropagation(); showPearlTiming(${d}, '${k.replace(/'/g, "\\'")}')" data-pearl-type="${k}" data-day="${d}">
+        <div class="pearl" onclick="event.stopPropagation(); showPearlTiming(${d}, '${k.replace(/'/g, "\\'")}')" data-pearl-type="${k}" data-day="${d}" data-tooltip="${pearlTooltip.replace(/"/g, '&quot;')}">
           <img src="${pearlImages[k]}">
           <span>${k}: ${day[k]}</span>
         </div>`;
@@ -1165,6 +1257,23 @@
           card += `</div></div>`;
           if (resultsEl) resultsEl.innerHTML += card;
         }
+
+        // Add event listeners to handle tooltip priority
+        // Hide day-box tooltips when hovering over pearl items
+        setTimeout(() => {
+          const allPearls = document.querySelectorAll('.pearl[data-tooltip]');
+          allPearls.forEach(pearl => {
+            const dayBox = pearl.closest('.day-box');
+            if (dayBox) {
+              pearl.addEventListener('mouseenter', () => {
+                dayBox.classList.add('pearl-hovered');
+              });
+              pearl.addEventListener('mouseleave', () => {
+                dayBox.classList.remove('pearl-hovered');
+              });
+            }
+          });
+        }, 100);
 
         // Store timing data globally for modal access
         window.pearlTimingData = pearlTimingData;
@@ -1183,7 +1292,7 @@
 
         let totalHTML = `
           <div onclick="showAllDaysTiming()" style="background: rgba(20, 20, 30, 0.6); padding: 16px; border-radius: 8px; margin-top: 16px; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(25, 25, 35, 0.7)'" onmouseout="this.style.background='rgba(20, 20, 30, 0.6)'">
-            <h4 style="color: #ffd369; margin: 0 0 12px 0; font-size: 1.1rem;">Total Across All Days <small style="color: #aaa; font-size: 0.8rem; font-weight: normal;">(Click to see all drops)</small></h4>
+            <h4 style="color: #ffd369; margin: 0 0 12px 0; font-size: 1.1rem;">Summary <small style="color: #aaa; font-size: 0.8rem; font-weight: normal;">(Click to see all drops)</small></h4>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
               <div><small style="color: #aaa;">Total laps:</small><br><strong style="color: #ffd369;">${totalLaps.toFixed(2)}</strong></div>
               <div><small style="color: #aaa;">Total time:</small><br><strong style="color: #ffd369;">${totalHours} hours</strong></div>
@@ -1310,7 +1419,7 @@
         if (allDrops.length === 0) {
           modalContent.innerHTML = "<p style='color: #aaa;'>No drops found for this pearl type.</p>";
         } else {
-          modalTitle.textContent = `${pearlType} - All Days (${allDrops.length} total)`;
+          modalTitle.textContent = `${pearlType} - All Days`;
           
           let html = `<p style="color: #c8c8c8; margin-bottom: 16px; font-size: 0.9rem;">Found ${allDrops.length} ${allDrops.length === 1 ? 'drop' : 'drops'} across all ${Object.keys(window.pearlTimingData).length} days:</p>`;
           
