@@ -679,13 +679,13 @@
             <strong style="color: #ffd369;">Hover</strong> over bars for details, <strong style="color: #ffd369;">click</strong> to see all drops of that type.
             <span class="info-icon">i</span>
           </p>
+          <div id="totalSummary" style="margin-bottom: 16px;">
+            <small>Run a simulation to populate totals.</small>
+          </div>
         <div id="chartWrapper">
           <canvas id="chart"></canvas>
           <div id="chartTooltip" class="chart-tooltip"></div>
         </div>
-          <div id="totalSummary" style="margin-top: 16px;">
-          <small>Run a simulation to populate totals.</small>
-          </div>
         </div>
       </div>
     </div>
@@ -1089,7 +1089,7 @@
           daysToSim.value = days;
         }
 
-        const circles = clams / 41;
+        const laps = clams / 41;
         const minutesPerDay = (clams / 41) * 5;
 
         const pearlOrder = [
@@ -1148,7 +1148,7 @@
           let card = `
       <div class="day-box" data-day="${d}" onclick="showDayTiming(${d})" style="cursor: pointer;">
         <h3>Day ${d}</h3>
-        <small>Circles: ${circles.toFixed(2)} | Time: ${minutesPerDay.toFixed(2)} min</small>
+        <small>Laps: ${laps.toFixed(2)} | Time: ${minutesPerDay.toFixed(2)} min</small>
         <div class="pearls-grid">
     `;
 
@@ -1177,15 +1177,15 @@
 
         // 🔹 TOTAL SUMMARY
         let totalClams = clams * days;
-        let totalCircles = (clams / 41) * days;
-        let totalMinutes = totalCircles * 5;
+        let totalLaps = (clams / 41) * days;
+        let totalMinutes = totalLaps * 5;
         let totalHours = (totalMinutes / 60).toFixed(2);
 
         let totalHTML = `
           <div onclick="showAllDaysTiming()" style="background: rgba(20, 20, 30, 0.6); padding: 16px; border-radius: 8px; margin-top: 16px; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(25, 25, 35, 0.7)'" onmouseout="this.style.background='rgba(20, 20, 30, 0.6)'">
             <h4 style="color: #ffd369; margin: 0 0 12px 0; font-size: 1.1rem;">Total Across All Days <small style="color: #aaa; font-size: 0.8rem; font-weight: normal;">(Click to see all drops)</small></h4>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-              <div><small style="color: #aaa;">Total circles:</small><br><strong style="color: #ffd369;">${totalCircles.toFixed(2)}</strong></div>
+              <div><small style="color: #aaa;">Total laps:</small><br><strong style="color: #ffd369;">${totalLaps.toFixed(2)}</strong></div>
               <div><small style="color: #aaa;">Total time:</small><br><strong style="color: #ffd369;">${totalHours} hours</strong></div>
               <div><small style="color: #aaa;">Total clams opened:</small><br><strong style="color: #ffd369;">${totalClams.toLocaleString()}</strong></div>
             </div>
