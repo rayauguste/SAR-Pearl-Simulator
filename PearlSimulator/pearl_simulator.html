@@ -902,7 +902,7 @@
         let totalHours = (totalMinutes / 60).toFixed(2);
 
         let totalHTML = `
-    <div class="day-box">
+    <div class="day-box" onclick="showAllDaysTiming()" style="cursor: pointer;">
       <h3>Total Across All Days</h3>
       <p><small>Total circles: ${totalCircles.toFixed(2)}</small></p>
       <p><small>Total time: ${totalMinutes.toFixed(2)} minutes (${totalHours} hours)</small></p>
@@ -915,7 +915,7 @@
           const percent = ((count / totalClams) * 100).toFixed(3);
           const avgPerDay = (count / days).toFixed(2);
           totalHTML += `
-      <div class="pearl">
+      <div class="pearl" onclick="event.stopPropagation(); showTotalPearlTiming('${k.replace(/'/g, "\\'")}')" style="cursor: pointer;">
         <img src="${pearlImages[k]}" alt="${k}">
         <span>
           <div class="pearl-name">${k}: ${count}</div>
@@ -1001,9 +1001,9 @@
         if (!dayData || dayData.length === 0) {
           modalContent.innerHTML = "<p style='color: #aaa;'>No data available for this day.</p>";
         } else {
-          modalTitle.textContent = `Day ${day} - All Drops (Chronological Order)`;
+          modalTitle.textContent = `Day ${day} - All Drops`;
           
-          let html = `<p style="color: #c8c8c8; margin-bottom: 16px; font-size: 0.9rem;">All ${dayData.length} drops on Day ${day} in order:</p>`;
+          let html = `<p style="color: #c8c8c8; margin-bottom: 16px; font-size: 0.9rem;">${dayData.length} drops on Day ${day} in chronological order:</p>`;
           
           dayData.forEach((drop, index) => {
             const hours = Math.floor(drop.timeMinutes / 60);
@@ -1032,6 +1032,145 @@
                 <strong>#${index + 1} - ${drop.type}</strong>
                 <small>
                   ${drop.clamInDay}${drop.clamInDay === 1 ? 'st' : drop.clamInDay === 2 ? 'nd' : drop.clamInDay === 3 ? 'rd' : 'th'} clam on Day ${day}<br>
+                  Time from start of day: ${timeDisplay}${timeSincePrevious}
+                </small>
+              </div>
+            `;
+          });
+          
+          modalContent.innerHTML = html;
+        }
+        
+        modal.classList.add("active");
+      }
+
+      function showTotalPearlTiming(pearlType) {
+        const modal = document.getElementById("pearlModal");
+        const modalTitle = document.getElementById("modalTitle");
+        const modalContent = document.getElementById("modalContent");
+        
+        if (!modal || !window.pearlTimingData) return;
+        
+        // Collect all drops of this pearl type across all days
+        const allDrops = [];
+        Object.keys(window.pearlTimingData).forEach(day => {
+          const dayData = window.pearlTimingData[day];
+          if (dayData[pearlType]) {
+            dayData[pearlType].forEach(drop => {
+              allDrops.push({
+                ...drop,
+                day: parseInt(day)
+              });
+            });
+          }
+        });
+        
+        // Sort by cumulative time to get chronological order
+        allDrops.sort((a, b) => a.cumulativeTimeMinutes - b.cumulativeTimeMinutes);
+        
+        if (allDrops.length === 0) {
+          modalContent.innerHTML = "<p style='color: #aaa;'>No drops found for this pearl type.</p>";
+        } else {
+          modalTitle.textContent = `${pearlType} - All Days (${allDrops.length} total)`;
+          
+          let html = `<p style="color: #c8c8c8; margin-bottom: 16px; font-size: 0.9rem;">Found ${allDrops.length} ${allDrops.length === 1 ? 'drop' : 'drops'} across all ${Object.keys(window.pearlTimingData).length} days:</p>`;
+          
+          const color = pearlColors[pearlType] || "#888888";
+          
+          allDrops.forEach((drop, index) => {
+            const hours = Math.floor(drop.timeMinutes / 60);
+            const minutes = (drop.timeMinutes % 60).toFixed(1);
+            const timeDisplay = hours > 0 
+              ? `${hours}h ${minutes}min` 
+              : `${minutes}min`;
+            
+            // Calculate time since previous drop (using cumulative time for cross-day comparison)
+            let timeSincePrevious = "";
+            if (index > 0) {
+              const prevDrop = allDrops[index - 1];
+              const timeDiff = drop.cumulativeTimeMinutes - prevDrop.cumulativeTimeMinutes;
+              const diffHours = Math.floor(timeDiff / 60);
+              const diffMinutes = (timeDiff % 60).toFixed(1);
+              const diffDisplay = diffHours > 0 
+                ? `${diffHours}h ${diffMinutes}min` 
+                : `${diffMinutes}min`;
+              timeSincePrevious = `<br>Time since previous: ${diffDisplay}`;
+            }
+            
+            html += `
+              <div class="pearl-timing-item" style="border-left-color: ${color};">
+                <strong>#${index + 1} - Day ${drop.day}</strong>
+                <small>
+                  ${drop.clamInDay}${drop.clamInDay === 1 ? 'st' : drop.clamInDay === 2 ? 'nd' : drop.clamInDay === 3 ? 'rd' : 'th'} clam on Day ${drop.day}<br>
+                  Time from start of day: ${timeDisplay}${timeSincePrevious}
+                </small>
+              </div>
+            `;
+          });
+          
+          modalContent.innerHTML = html;
+        }
+        
+        modal.classList.add("active");
+      }
+
+      function showAllDaysTiming() {
+        const modal = document.getElementById("pearlModal");
+        const modalTitle = document.getElementById("modalTitle");
+        const modalContent = document.getElementById("modalContent");
+        
+        if (!modal || !window.dayChronologicalData) return;
+        
+        // Collect all drops across all days in chronological order
+        const allDrops = [];
+        Object.keys(window.dayChronologicalData).forEach(day => {
+          const dayData = window.dayChronologicalData[day];
+          dayData.forEach(drop => {
+            allDrops.push({
+              ...drop,
+              day: parseInt(day)
+            });
+          });
+        });
+        
+        // Sort by cumulative time to get chronological order across all days
+        allDrops.sort((a, b) => a.cumulativeTimeMinutes - b.cumulativeTimeMinutes);
+        
+        if (allDrops.length === 0) {
+          modalContent.innerHTML = "<p style='color: #aaa;'>No data available.</p>";
+        } else {
+          const totalDays = Object.keys(window.dayChronologicalData).length;
+          modalTitle.textContent = `All Days - All Drops`;
+          
+          let html = `<p style="color: #c8c8c8; margin-bottom: 16px; font-size: 0.9rem;">${allDrops.length} drops across all ${totalDays} days in chronological order:</p>`;
+          
+          allDrops.forEach((drop, index) => {
+            const hours = Math.floor(drop.timeMinutes / 60);
+            const minutes = (drop.timeMinutes % 60).toFixed(1);
+            const timeDisplay = hours > 0 
+              ? `${hours}h ${minutes}min` 
+              : `${minutes}min`;
+            
+            // Calculate time since previous drop (using cumulative time for cross-day comparison)
+            let timeSincePrevious = "";
+            if (index > 0) {
+              const prevDrop = allDrops[index - 1];
+              const timeDiff = drop.cumulativeTimeMinutes - prevDrop.cumulativeTimeMinutes;
+              const diffHours = Math.floor(timeDiff / 60);
+              const diffMinutes = (timeDiff % 60).toFixed(1);
+              const diffDisplay = diffHours > 0 
+                ? `${diffHours}h ${diffMinutes}min` 
+                : `${diffMinutes}min`;
+              timeSincePrevious = `<br>Time since previous: ${diffDisplay}`;
+            }
+            
+            const color = pearlColors[drop.type] || "#888888";
+            
+            html += `
+              <div class="pearl-timing-item" style="border-left-color: ${color};">
+                <strong>#${index + 1} - ${drop.type} (Day ${drop.day})</strong>
+                <small>
+                  ${drop.clamInDay}${drop.clamInDay === 1 ? 'st' : drop.clamInDay === 2 ? 'nd' : drop.clamInDay === 3 ? 'rd' : 'th'} clam on Day ${drop.day}<br>
                   Time from start of day: ${timeDisplay}${timeSincePrevious}
                 </small>
               </div>
