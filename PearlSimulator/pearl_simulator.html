@@ -702,6 +702,61 @@
         color: #ddd;
         margin-top: 10px;
       }
+
+      /* Filter Styles */
+      .pearl-filter-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px;
+        background: rgba(30, 30, 45, 0.5);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .pearl-filter-item:hover {
+        background: rgba(40, 40, 55, 0.7);
+      }
+
+      .pearl-filter-item input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: #ffd369;
+      }
+
+      .pearl-filter-item label {
+        cursor: pointer;
+        color: #ddd;
+        font-size: 0.9rem;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .pearl-filter-item img {
+        width: 20px;
+        height: 20px;
+      }
+
+      #daySearch:focus {
+        outline: none;
+        border-color: rgba(255, 211, 105, 0.6);
+      }
+
+      #searchFilterContent {
+        transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+      }
+
+      #searchFilterToggle {
+        user-select: none;
+      }
+
+      #searchFilterToggle.rotated {
+        transform: rotate(180deg);
+      }
     </style>
   </head>
 
@@ -802,6 +857,37 @@
           <div id="chartTooltip" class="chart-tooltip"></div>
         </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div id="searchFilterSection" style="display: none; margin: 20px auto; max-width: 1200px; background: rgba(20, 20, 30, 0.6); border-radius: 12px; border: 1px solid rgba(255, 211, 105, 0.2); overflow: hidden;">
+      <div id="searchFilterHeader" onclick="toggleSearchFilter()" style="padding: 12px 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: rgba(30, 30, 45, 0.5); transition: background 0.2s;" onmouseover="this.style.background='rgba(35, 35, 50, 0.6)'" onmouseout="this.style.background='rgba(30, 30, 45, 0.5)'">
+        <h3 style="color: #ffd369; margin: 0; font-size: 1rem; font-weight: normal;">Search & Filter Results</h3>
+        <span id="searchFilterToggle" style="color: #ffd369; font-size: 1.2rem; transition: transform 0.2s;">▼</span>
+      </div>
+      
+      <div id="searchFilterContent" style="display: none; padding: 16px;">
+        <!-- Search Bar -->
+        <div style="margin-bottom: 16px;">
+          <label for="daySearch" style="display: block; color: #ddd; margin-bottom: 8px; font-size: 0.9rem;">Search Days:</label>
+          <input 
+            type="text" 
+            id="daySearch" 
+            placeholder="Search by day number or pearl type..."
+            style="width: 100%; padding: 10px 14px; background: rgba(30, 30, 45, 0.8); border: 1px solid rgba(255, 211, 105, 0.3); border-radius: 8px; color: #ddd; font-size: 0.95rem;"
+          />
+        </div>
+
+        <!-- Pearl Type Filters -->
+        <div style="margin-bottom: 8px;">
+          <label style="display: block; color: #ddd; margin-bottom: 8px; font-size: 0.9rem;">Filter by Pearl/Clam Type:</label>
+          <div id="pearlFilters" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;">
+            <!-- Filters will be populated by JavaScript -->
+          </div>
+        </div>
+        
+        <div id="filterResults" style="margin-top: 12px; color: #aaa; font-size: 0.85rem;"></div>
       </div>
     </div>
 
@@ -1195,6 +1281,12 @@
         }
         if (totalSummaryEl) totalSummaryEl.innerHTML = '<small>Running simulation...</small>';
         
+        // Hide search/filter section during loading
+        const searchFilterSection = document.getElementById("searchFilterSection");
+        if (searchFilterSection) {
+          searchFilterSection.style.display = "none";
+        }
+        
         // Clear canvas
         if (canvas) {
           const ctx = canvas.getContext("2d");
@@ -1291,8 +1383,11 @@
             const totalDayDrops = Object.values(day).reduce((a, b) => a + b, 0);
             const dayTooltip = `Day ${d}: ${totalDayDrops} total drops across ${Object.keys(day).length} types. Click to see all drops in order.`;
             
+            // Create comma-separated list of pearl types for filtering
+            const pearlTypesInDay = Object.keys(day).join(',');
+            
             let card = `
-      <div class="day-box" data-day="${d}" onclick="showDayTiming(${d})" style="cursor: pointer;" data-tooltip="${dayTooltip.replace(/"/g, '&quot;')}">
+      <div class="day-box" data-day="${d}" data-pearl-types="${pearlTypesInDay}" onclick="showDayTiming(${d})" style="cursor: pointer;" data-tooltip="${dayTooltip.replace(/"/g, '&quot;')}">
         <h3>Day ${d}</h3>
         <small>Laps: ${laps.toFixed(2)} | Time: ${minutesPerDay.toFixed(2)} min</small>
         <div class="pearls-grid">
@@ -1331,6 +1426,10 @@
                 });
               }
             });
+            
+            // Show search/filter section and populate filters
+            populateFilters();
+            setupSearchAndFilters();
           }, 100);
 
           // Store timing data globally for modal access
@@ -1366,6 +1465,149 @@
             simulateButton.disabled = false;
           }
         }, 100); // End of setTimeout - allows loading animation to render
+      }
+
+      // Filter Functions
+      function populateFilters() {
+        const filtersContainer = document.getElementById("pearlFilters");
+        const searchSection = document.getElementById("searchFilterSection");
+        const daySearch = document.getElementById("daySearch");
+        
+        if (!filtersContainer || !searchSection) return;
+        
+        // Save current filter state before repopulating
+        const savedFilterState = {};
+        const existingCheckboxes = filtersContainer.querySelectorAll('input[type="checkbox"]');
+        existingCheckboxes.forEach(checkbox => {
+          savedFilterState[checkbox.value] = checkbox.checked;
+        });
+        
+        // Save search value
+        const savedSearchValue = daySearch ? daySearch.value : "";
+        
+        // Show search/filter section
+        searchSection.style.display = "block";
+        
+        // Get all pearl types from pearlImages
+        const pearlOrder = [
+          "Empty Clam",
+          "White Pearl",
+          "Green Pearl",
+          "Blue Pearl",
+          "Purple Pearl",
+          "Gold Pearl",
+          "Black Pearl",
+        ];
+        
+        filtersContainer.innerHTML = "";
+        
+        pearlOrder.forEach(pearlType => {
+          const filterItem = document.createElement("div");
+          filterItem.className = "pearl-filter-item";
+          
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.id = `filter-${pearlType.replace(/\s+/g, '-')}`;
+          checkbox.value = pearlType;
+          // Restore saved state, or default to true if no saved state
+          checkbox.checked = savedFilterState.hasOwnProperty(pearlType) ? savedFilterState[pearlType] : true;
+          
+          const label = document.createElement("label");
+          label.htmlFor = checkbox.id;
+          label.innerHTML = `<img src="${pearlImages[pearlType]}" alt="${pearlType}">${pearlType}`;
+          
+          filterItem.appendChild(checkbox);
+          filterItem.appendChild(label);
+          filtersContainer.appendChild(filterItem);
+        });
+        
+        // Restore search value
+        if (daySearch && savedSearchValue) {
+          daySearch.value = savedSearchValue;
+        }
+      }
+
+      function setupSearchAndFilters() {
+        const daySearch = document.getElementById("daySearch");
+        
+        if (daySearch) {
+          daySearch.addEventListener('input', filterResults);
+        }
+        
+        // Get checkboxes after they're created by populateFilters
+        setTimeout(() => {
+          const checkboxes = document.querySelectorAll('#pearlFilters input[type="checkbox"]');
+          checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', filterResults);
+          });
+          
+          // Apply saved filter state after setting up listeners
+          filterResults();
+        }, 10);
+      }
+
+      function filterResults() {
+        const daySearch = document.getElementById("daySearch");
+        const allCheckboxes = document.querySelectorAll('#pearlFilters input[type="checkbox"]');
+        const checkedBoxes = document.querySelectorAll('#pearlFilters input[type="checkbox"]:checked');
+        const allDayBoxes = document.querySelectorAll('.day-box');
+        const filterResultsEl = document.getElementById("filterResults");
+        
+        const searchTerm = daySearch ? daySearch.value.toLowerCase().trim() : '';
+        const selectedPearls = Array.from(checkedBoxes).map(cb => cb.value);
+        
+        let visibleCount = 0;
+        
+        allDayBoxes.forEach(dayBox => {
+          const dayNum = dayBox.getAttribute('data-day');
+          const pearlTypes = dayBox.getAttribute('data-pearl-types') || '';
+          const pearlTypesList = pearlTypes.split(',').filter(t => t.trim());
+          
+          // Check search term (search by day number or pearl type names in the day)
+          let matchesSearch = true;
+          if (searchTerm) {
+            const dayMatches = dayNum && dayNum.toLowerCase().includes(searchTerm);
+            const pearlMatches = pearlTypesList.some(type => 
+              type.toLowerCase().includes(searchTerm)
+            );
+            matchesSearch = dayMatches || pearlMatches;
+          }
+          
+          // Check if day has at least one selected pearl type
+          // If no pearls are selected, hide all days
+          const hasSelectedPearl = selectedPearls.length === 0 ? false : selectedPearls.some(pearl => 
+            pearlTypesList.includes(pearl)
+          );
+          
+          // Show/hide day box
+          if (matchesSearch && hasSelectedPearl) {
+            dayBox.style.display = "block";
+            visibleCount++;
+          } else {
+            dayBox.style.display = "none";
+          }
+        });
+        
+        // Update filter results count
+        if (filterResultsEl) {
+          const totalCheckboxes = allCheckboxes.length;
+          if (visibleCount === allDayBoxes.length && !searchTerm && selectedPearls.length === totalCheckboxes) {
+            filterResultsEl.textContent = "";
+          } else {
+            filterResultsEl.textContent = `Showing ${visibleCount} of ${allDayBoxes.length} days`;
+          }
+        }
+      }
+
+      function toggleSearchFilter() {
+        const content = document.getElementById("searchFilterContent");
+        const toggle = document.getElementById("searchFilterToggle");
+        
+        if (content && toggle) {
+          const isHidden = content.style.display === "none";
+          content.style.display = isHidden ? "block" : "none";
+          toggle.classList.toggle("rotated", isHidden);
+        }
       }
 
       function showPearlTiming(day, pearlType) {
