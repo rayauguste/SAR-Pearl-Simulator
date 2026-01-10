@@ -671,6 +671,37 @@
       .day-box.pearl-hovered::before {
         display: none !important;
       }
+
+      /* Loading Animation */
+      .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        color: #ffd369;
+      }
+
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid rgba(255, 211, 105, 0.2);
+        border-top: 4px solid #ffd369;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      .loading-text {
+        font-size: 1rem;
+        color: #ddd;
+        margin-top: 10px;
+      }
     </style>
   </head>
 
@@ -747,7 +778,7 @@
           </div>
         </div>
 
-        <button onclick="runSimulation()">Run Simulation</button>
+        <button id="simulateButton" onclick="runSimulation()">Run Simulation</button>
         <div
           id="scrollHint"
           style="color: #ffd369; margin-top: 6px; display: none"
@@ -1151,156 +1182,190 @@
         const resultsEl = document.getElementById("results");
         const totalSummaryEl = document.getElementById("totalSummary");
         const scrollHintEl = document.getElementById("scrollHint");
+        const canvas = document.getElementById("chart");
         
-        // Show scroll hint
-        if (scrollHintEl) scrollHintEl.style.display = "block";
-
-        // Clear previous results
-        if (resultsEl) resultsEl.innerHTML = "";
-        if (totalSummaryEl) totalSummaryEl.innerHTML = '<small>Run a simulation to populate totals.</small>';
-        
-        // Reset totals
-        let totals = {};
-        Object.keys(pearlImages).forEach((k) => (totals[k] = 0));
-
-        const clams = +clamsPerDay.value;
-        let days = +daysToSim.value;
-        
-        // Validate days: must be between 1 and 365
-        if (days < 1) days = 1;
-        if (days > 365) days = 365;
-        if (daysToSim.value != days) {
-          daysToSim.value = days;
+        // Show loading animation
+        if (resultsEl) {
+          resultsEl.innerHTML = `
+            <div class="loading-container">
+              <div class="loading-spinner"></div>
+              <div class="loading-text">Simulating pearl drops...</div>
+            </div>
+          `;
         }
+        if (totalSummaryEl) totalSummaryEl.innerHTML = '<small>Running simulation...</small>';
+        
+        // Clear canvas
+        if (canvas) {
+          const ctx = canvas.getContext("2d");
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        // Disable button during simulation
+        const simulateButton = document.getElementById("simulateButton");
+        if (simulateButton) {
+          simulateButton.disabled = true;
+          simulateButton.textContent = "Running...";
+        }
+        
+        // Use setTimeout to allow UI to update with loading animation
+        setTimeout(() => {
+          // Show scroll hint
+          if (scrollHintEl) scrollHintEl.style.display = "block";
 
-        const laps = clams / 41;
-        const minutesPerDay = (clams / 41) * 5;
+          // Clear previous results (loading animation will be replaced)
+          if (resultsEl) resultsEl.innerHTML = "";
+          if (totalSummaryEl) totalSummaryEl.innerHTML = '<small>Run a simulation to populate totals.</small>';
+        
+          // Reset totals
+          let totals = {};
+          Object.keys(pearlImages).forEach((k) => (totals[k] = 0));
 
-        const pearlOrder = [
-          "Empty Clam",
-          "White Pearl",
-          "Green Pearl",
-          "Blue Pearl",
-          "Purple Pearl",
-          "Gold Pearl",
-          "Black Pearl",
-        ];
-
-        // Store timing data for each pearl type by day
-        const pearlTimingData = {};
-        // Store all drops in chronological order for each day
-        const dayChronologicalData = {};
-
-        for (let d = 1; d <= days; d++) {
-          let day = {};
-          // Track when each pearl was obtained this day
-          const dayPearlTimings = {};
-          // Track all drops in chronological order for this day
-          const chronologicalDrops = [];
-
-          for (let i = 0; i < clams; i++) {
-            const r = rollOneClam();
-            day[r] = (day[r] || 0) + 1;
-            totals[r]++;
-            
-            // Track timing for each pearl drop
-            if (!dayPearlTimings[r]) {
-              dayPearlTimings[r] = [];
-            }
-            // Calculate: time from start of this day (not cumulative)
-            const timeFromDayStart = ((i + 1) / 41) * 5;
-            // Also track cumulative for time since previous calculations
-            const totalClamsSoFar = (d - 1) * clams + (i + 1);
-            const cumulativeTimeMinutes = (totalClamsSoFar / 41) * 5;
-            const dropData = {
-              type: r,
-              clam: totalClamsSoFar,
-              timeMinutes: timeFromDayStart, // Time from start of this day
-              cumulativeTimeMinutes: cumulativeTimeMinutes, // For calculating time since previous
-              day: d,
-              clamInDay: i + 1
-            };
-            dayPearlTimings[r].push(dropData);
-            chronologicalDrops.push(dropData);
+          const clams = +clamsPerDay.value;
+          let days = +daysToSim.value;
+          
+          // Validate days: must be between 1 and 365
+          if (days < 1) days = 1;
+          if (days > 365) days = 365;
+          if (daysToSim.value != days) {
+            daysToSim.value = days;
           }
 
-          // Store timing data for this day
-          pearlTimingData[d] = dayPearlTimings;
-          dayChronologicalData[d] = chronologicalDrops;
+          const laps = clams / 41;
+          const minutesPerDay = (clams / 41) * 5;
 
-          // 🔹 BUILD DAY CARD
-          // Calculate total drops for this day for tooltip
-          const totalDayDrops = Object.values(day).reduce((a, b) => a + b, 0);
-          const dayTooltip = `Day ${d}: ${totalDayDrops} total drops across ${Object.keys(day).length} types. Click to see all drops in order.`;
-          
-          let card = `
+          const pearlOrder = [
+            "Empty Clam",
+            "White Pearl",
+            "Green Pearl",
+            "Blue Pearl",
+            "Purple Pearl",
+            "Gold Pearl",
+            "Black Pearl",
+          ];
+
+          // Store timing data for each pearl type by day
+          const pearlTimingData = {};
+          // Store all drops in chronological order for each day
+          const dayChronologicalData = {};
+
+          for (let d = 1; d <= days; d++) {
+            let day = {};
+            // Track when each pearl was obtained this day
+            const dayPearlTimings = {};
+            // Track all drops in chronological order for this day
+            const chronologicalDrops = [];
+
+            for (let i = 0; i < clams; i++) {
+              const r = rollOneClam();
+              day[r] = (day[r] || 0) + 1;
+              totals[r]++;
+              
+              // Track timing for each pearl drop
+              if (!dayPearlTimings[r]) {
+                dayPearlTimings[r] = [];
+              }
+              // Calculate: time from start of this day (not cumulative)
+              const timeFromDayStart = ((i + 1) / 41) * 5;
+              // Also track cumulative for time since previous calculations
+              const totalClamsSoFar = (d - 1) * clams + (i + 1);
+              const cumulativeTimeMinutes = (totalClamsSoFar / 41) * 5;
+              const dropData = {
+                type: r,
+                clam: totalClamsSoFar,
+                timeMinutes: timeFromDayStart, // Time from start of this day
+                cumulativeTimeMinutes: cumulativeTimeMinutes, // For calculating time since previous
+                day: d,
+                clamInDay: i + 1
+              };
+              dayPearlTimings[r].push(dropData);
+              chronologicalDrops.push(dropData);
+            }
+
+            // Store timing data for this day
+            pearlTimingData[d] = dayPearlTimings;
+            dayChronologicalData[d] = chronologicalDrops;
+
+            // 🔹 BUILD DAY CARD
+            // Calculate total drops for this day for tooltip
+            const totalDayDrops = Object.values(day).reduce((a, b) => a + b, 0);
+            const dayTooltip = `Day ${d}: ${totalDayDrops} total drops across ${Object.keys(day).length} types. Click to see all drops in order.`;
+            
+            let card = `
       <div class="day-box" data-day="${d}" onclick="showDayTiming(${d})" style="cursor: pointer;" data-tooltip="${dayTooltip.replace(/"/g, '&quot;')}">
         <h3>Day ${d}</h3>
         <small>Laps: ${laps.toFixed(2)} | Time: ${minutesPerDay.toFixed(2)} min</small>
         <div class="pearls-grid">
     `;
 
-          for (let k of pearlOrder) {
-            if (!day[k]) continue;
-            const pearlKey = `day-${d}-${k}`;
-            const count = day[k];
-            const percent = totalDayDrops > 0 ? ((count / totalDayDrops) * 100).toFixed(1) : "0";
-            const pearlTooltip = `${k}: ${count} drop${count === 1 ? '' : 's'} on Day ${d} (${percent}% of this day's drops). Click for timing details.`;
-            
-            card += `
+            for (let k of pearlOrder) {
+              if (!day[k]) continue;
+              const pearlKey = `day-${d}-${k}`;
+              const count = day[k];
+              const percent = totalDayDrops > 0 ? ((count / totalDayDrops) * 100).toFixed(1) : "0";
+              const pearlTooltip = `${k}: ${count} drop${count === 1 ? '' : 's'} on Day ${d} (${percent}% of this day's drops). Click for timing details.`;
+              
+              card += `
         <div class="pearl" onclick="event.stopPropagation(); showPearlTiming(${d}, '${k.replace(/'/g, "\\'")}')" data-pearl-type="${k}" data-day="${d}" data-tooltip="${pearlTooltip.replace(/"/g, '&quot;')}">
           <img src="${pearlImages[k]}">
           <span>${k}: ${day[k]}</span>
         </div>`;
+            }
+
+            card += `</div></div>`;
+            if (resultsEl) resultsEl.innerHTML += card;
           }
 
-          card += `</div></div>`;
-          if (resultsEl) resultsEl.innerHTML += card;
-        }
+          // Add event listeners to handle tooltip priority
+          // Hide day-box tooltips when hovering over pearl items
+          setTimeout(() => {
+            const allPearls = document.querySelectorAll('.pearl[data-tooltip]');
+            allPearls.forEach(pearl => {
+              const dayBox = pearl.closest('.day-box');
+              if (dayBox) {
+                pearl.addEventListener('mouseenter', () => {
+                  dayBox.classList.add('pearl-hovered');
+                });
+                pearl.addEventListener('mouseleave', () => {
+                  dayBox.classList.remove('pearl-hovered');
+                });
+              }
+            });
+          }, 100);
 
-        // Add event listeners to handle tooltip priority
-        // Hide day-box tooltips when hovering over pearl items
-        setTimeout(() => {
-          const allPearls = document.querySelectorAll('.pearl[data-tooltip]');
-          allPearls.forEach(pearl => {
-            const dayBox = pearl.closest('.day-box');
-            if (dayBox) {
-              pearl.addEventListener('mouseenter', () => {
-                dayBox.classList.add('pearl-hovered');
-              });
-              pearl.addEventListener('mouseleave', () => {
-                dayBox.classList.remove('pearl-hovered');
-              });
-            }
-          });
-        }, 100);
+          // Store timing data globally for modal access
+          window.pearlTimingData = pearlTimingData;
+          window.dayChronologicalData = dayChronologicalData;
 
-        // Store timing data globally for modal access
-        window.pearlTimingData = pearlTimingData;
-        window.dayChronologicalData = dayChronologicalData;
+          // 🔹 DRAW CHART (with a small delay to ensure canvas is ready)
+          setTimeout(() => {
+            drawChart(totals, days);
+          }, 50);
 
-        // 🔹 DRAW CHART (with a small delay to ensure canvas is ready)
-        setTimeout(() => {
-        drawChart(totals, days);
-        }, 50);
+          // 🔹 TOTAL SUMMARY
+          let totalClams = clams * days;
+          let totalLaps = (clams / 41) * days;
+          let totalMinutes = totalLaps * 5;
+          let totalHours = (totalMinutes / 60).toFixed(2);
 
-        // 🔹 TOTAL SUMMARY
-        let totalClams = clams * days;
-        let totalLaps = (clams / 41) * days;
-        let totalMinutes = totalLaps * 5;
-        let totalHours = (totalMinutes / 60).toFixed(2);
-
-        let totalHTML = `
-          <div onclick="showAllDaysTiming()" style="background: rgba(20, 20, 30, 0.6); padding: 16px; border-radius: 8px; margin-top: 16px; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(25, 25, 35, 0.7)'" onmouseout="this.style.background='rgba(20, 20, 30, 0.6)'">
-            <h4 style="color: #ffd369; margin: 0 0 12px 0; font-size: 1.1rem;">Summary <small style="color: #aaa; font-size: 0.8rem; font-weight: normal;">(Click to see all drops)</small></h4>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-              <div><small style="color: #aaa;">Total laps:</small><br><strong style="color: #ffd369;">${totalLaps.toFixed(2)}</strong></div>
-              <div><small style="color: #aaa;">Total time:</small><br><strong style="color: #ffd369;">${totalHours} hours</strong></div>
-              <div><small style="color: #aaa;">Total clams opened:</small><br><strong style="color: #ffd369;">${totalClams.toLocaleString()}</strong></div>
+          let totalHTML = `
+            <div onclick="showAllDaysTiming()" style="background: rgba(20, 20, 30, 0.6); padding: 16px; border-radius: 8px; margin-top: 16px; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(25, 25, 35, 0.7)'" onmouseout="this.style.background='rgba(20, 20, 30, 0.6)'">
+              <h4 style="color: #ffd369; margin: 0 0 12px 0; font-size: 1.1rem;">Summary <small style="color: #aaa; font-size: 0.8rem; font-weight: normal;">(Click to see all drops)</small></h4>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                <div><small style="color: #aaa;">Total laps:</small><br><strong style="color: #ffd369;">${totalLaps.toFixed(2)}</strong></div>
+                <div><small style="color: #aaa;">Total time:</small><br><strong style="color: #ffd369;">${totalHours} hours</strong></div>
+                <div><small style="color: #aaa;">Total clams opened:</small><br><strong style="color: #ffd369;">${totalClams.toLocaleString()}</strong></div>
+              </div>
             </div>
-          </div>
-        `;
-        if (totalSummaryEl) totalSummaryEl.innerHTML = totalHTML;
+          `;
+          if (totalSummaryEl) totalSummaryEl.innerHTML = totalHTML;
+          
+          // Update button text to "Rerun Simulation" and re-enable
+          if (simulateButton) {
+            simulateButton.textContent = "Rerun Simulation";
+            simulateButton.disabled = false;
+          }
+        }, 100); // End of setTimeout - allows loading animation to render
       }
 
       function showPearlTiming(day, pearlType) {
