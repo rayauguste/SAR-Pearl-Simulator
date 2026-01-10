@@ -475,7 +475,7 @@
         <input id="clamsPerDay" type="number" value="150" />
 
         <label>Days to simulate</label>
-        <input id="daysToSim" type="number" value="50" />
+        <input id="daysToSim" type="number" value="50" min="1" max="365" />
 
           <h3 style="margin-top: 24px; margin-bottom: 12px;">Drop Chances</h3>
           <p style="color: #dddddd; font-size: 14px; line-height: 1.4; margin-bottom: 16px">
@@ -526,8 +526,8 @@
             This chart shows the total number of each pearl type (and empty clams) across all simulated days. 
             The taller the bar, the more drops you received.
           </p>
-          <div id="chartWrapper">
-            <canvas id="chart"></canvas>
+        <div id="chartWrapper">
+          <canvas id="chart"></canvas>
           </div>
           <div style="background: rgba(255, 211, 105, 0.1); border-left: 3px solid rgba(255, 211, 105, 0.5); padding: 12px 16px; margin-top: 16px; border-radius: 8px;">
             <p style="color: #ddd; font-size: 0.85rem; line-height: 1.6; margin: 0;">
@@ -719,7 +719,7 @@
         }
 
           // Draw bars - always show all bars (6 pearl types + empty clams)
-          entries.forEach(([k, v], i) => {
+        entries.forEach(([k, v], i) => {
             try {
               const x = padding.left + i * barSpacing + (barSpacing - barWidth) / 2;
               const numValue = typeof v === 'number' && !isNaN(v) ? v : 0;
@@ -752,10 +752,10 @@
                 // Draw a thin line for zero values
                 ctx.strokeStyle = hexToRgba(color, 0.25); // ~25% opacity (40 in hex)
                 ctx.lineWidth = 1;
-                ctx.beginPath();
+          ctx.beginPath();
                 ctx.moveTo(x, padding.top + chartHeight);
                 ctx.lineTo(x + barWidth, padding.top + chartHeight);
-                ctx.stroke();
+          ctx.stroke();
               }
               
               // Value label on top of bar (always show, even for 0)
@@ -821,7 +821,14 @@
         Object.keys(pearlImages).forEach((k) => (totals[k] = 0));
 
         const clams = +clamsPerDay.value;
-        const days = +daysToSim.value;
+        let days = +daysToSim.value;
+        
+        // Validate days: must be between 1 and 365
+        if (days < 1) days = 1;
+        if (days > 365) days = 365;
+        if (daysToSim.value != days) {
+          daysToSim.value = days;
+        }
 
         const circles = clams / 41;
         const minutesPerDay = (clams / 41) * 5;
@@ -970,20 +977,6 @@
                 ? `${hours}h ${minutes}min` 
                 : `${minutes}min`;
               
-              // Calculate time since previous pearl of same type (if any)
-              // Use time from start of day since they're all on the same day
-              let timeSincePrevious = "";
-              if (index > 0) {
-                const prevTiming = timings[index - 1];
-                const timeDiff = timing.timeMinutes - prevTiming.timeMinutes;
-                const diffHours = Math.floor(timeDiff / 60);
-                const diffMinutes = (timeDiff % 60).toFixed(1);
-                const diffDisplay = diffHours > 0 
-                  ? `${diffHours}h ${diffMinutes}min` 
-                  : `${diffMinutes}min`;
-                timeSincePrevious = `<br>Time since previous: ${diffDisplay}`;
-              }
-              
               html += `
                 <div class="pearl-timing-item">
                   <img src="${pearlImages[pearlType]}" alt="${pearlType}">
@@ -991,7 +984,7 @@
                     <strong>Drop #${index + 1}</strong>
                     <small>
                       ${timing.clamInDay}${timing.clamInDay === 1 ? 'st' : timing.clamInDay === 2 ? 'nd' : timing.clamInDay === 3 ? 'rd' : 'th'} clam on Day ${day}<br>
-                      Time from start of day: ${timeDisplay}${timeSincePrevious}
+                      Time from start of day: ${timeDisplay}
                     </small>
                   </div>
                 </div>
@@ -1027,19 +1020,6 @@
               ? `${hours}h ${minutes}min` 
               : `${minutes}min`;
             
-            // Calculate time since previous drop (if any)
-            let timeSincePrevious = "";
-            if (index > 0) {
-              const prevDrop = dayData[index - 1];
-              const timeDiff = drop.timeMinutes - prevDrop.timeMinutes;
-              const diffHours = Math.floor(timeDiff / 60);
-              const diffMinutes = (timeDiff % 60).toFixed(1);
-              const diffDisplay = diffHours > 0 
-                ? `${diffHours}h ${diffMinutes}min` 
-                : `${diffMinutes}min`;
-              timeSincePrevious = `<br>Time since previous: ${diffDisplay}`;
-            }
-            
             html += `
               <div class="pearl-timing-item">
                 <img src="${pearlImages[drop.type]}" alt="${drop.type}">
@@ -1047,7 +1027,7 @@
                   <strong>#${index + 1} - ${drop.type}</strong>
                   <small>
                     ${drop.clamInDay}${drop.clamInDay === 1 ? 'st' : drop.clamInDay === 2 ? 'nd' : drop.clamInDay === 3 ? 'rd' : 'th'} clam on Day ${day}<br>
-                    Time from start of day: ${timeDisplay}${timeSincePrevious}
+                    Time from start of day: ${timeDisplay}
                   </small>
                 </div>
               </div>
@@ -1098,19 +1078,6 @@
               ? `${hours}h ${minutes}min` 
               : `${minutes}min`;
             
-            // Calculate time since previous drop (using cumulative time for cross-day comparison)
-            let timeSincePrevious = "";
-            if (index > 0) {
-              const prevDrop = allDrops[index - 1];
-              const timeDiff = drop.cumulativeTimeMinutes - prevDrop.cumulativeTimeMinutes;
-              const diffHours = Math.floor(timeDiff / 60);
-              const diffMinutes = (timeDiff % 60).toFixed(1);
-              const diffDisplay = diffHours > 0 
-                ? `${diffHours}h ${diffMinutes}min` 
-                : `${diffMinutes}min`;
-              timeSincePrevious = `<br>Time since previous: ${diffDisplay}`;
-            }
-            
             html += `
               <div class="pearl-timing-item">
                 <img src="${pearlImages[pearlType]}" alt="${pearlType}">
@@ -1118,7 +1085,7 @@
                   <strong>#${index + 1} - Day ${drop.day}</strong>
                   <small>
                     ${drop.clamInDay}${drop.clamInDay === 1 ? 'st' : drop.clamInDay === 2 ? 'nd' : drop.clamInDay === 3 ? 'rd' : 'th'} clam on Day ${drop.day}<br>
-                    Time from start of day: ${timeDisplay}${timeSincePrevious}
+                    Time from start of day: ${timeDisplay}
                   </small>
                 </div>
               </div>
@@ -1168,19 +1135,6 @@
               ? `${hours}h ${minutes}min` 
               : `${minutes}min`;
             
-            // Calculate time since previous drop (using cumulative time for cross-day comparison)
-            let timeSincePrevious = "";
-            if (index > 0) {
-              const prevDrop = allDrops[index - 1];
-              const timeDiff = drop.cumulativeTimeMinutes - prevDrop.cumulativeTimeMinutes;
-              const diffHours = Math.floor(timeDiff / 60);
-              const diffMinutes = (timeDiff % 60).toFixed(1);
-              const diffDisplay = diffHours > 0 
-                ? `${diffHours}h ${diffMinutes}min` 
-                : `${diffMinutes}min`;
-              timeSincePrevious = `<br>Time since previous: ${diffDisplay}`;
-            }
-            
             html += `
               <div class="pearl-timing-item">
                 <img src="${pearlImages[drop.type]}" alt="${drop.type}">
@@ -1188,7 +1142,7 @@
                   <strong>#${index + 1} - ${drop.type} (Day ${drop.day})</strong>
                   <small>
                     ${drop.clamInDay}${drop.clamInDay === 1 ? 'st' : drop.clamInDay === 2 ? 'nd' : drop.clamInDay === 3 ? 'rd' : 'th'} clam on Day ${drop.day}<br>
-                    Time from start of day: ${timeDisplay}${timeSincePrevious}
+                    Time from start of day: ${timeDisplay}
                   </small>
                 </div>
               </div>
