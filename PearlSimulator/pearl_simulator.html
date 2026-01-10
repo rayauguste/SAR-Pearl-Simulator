@@ -30,7 +30,6 @@
         font-weight: 700;
         margin-bottom: 40px;
         letter-spacing: -0.5px;
-        text-shadow: 0 2px 20px rgba(255, 211, 105, 0.3);
       }
 
       h3 {
@@ -186,8 +185,7 @@
         border-color: #ffd369;
         outline: none;
         background: rgba(30, 30, 40, 0.95);
-        box-shadow: 0 0 0 3px rgba(255, 211, 105, 0.15),
-                    inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
       }
 
       button {
@@ -201,8 +199,7 @@
         border-radius: 10px;
         cursor: pointer;
         transition: all 0.2s ease;
-        box-shadow: 0 4px 12px rgba(255, 211, 105, 0.3),
-                    0 2px 4px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         letter-spacing: 0.3px;
         margin-top: 20px;
         width: 100%;
@@ -211,14 +208,12 @@
       button:hover {
         background: linear-gradient(135deg, #ffdf85 0%, #ffc266 100%);
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(255, 211, 105, 0.4),
-                    0 3px 6px rgba(0, 0, 0, 0.25);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
       }
 
       button:active {
         transform: translateY(0);
-        box-shadow: 0 2px 8px rgba(255, 211, 105, 0.3),
-                    0 1px 2px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
       }
 
       #scrollHint {
@@ -298,6 +293,10 @@
         transition: all 0.2s ease;
       }
 
+      .pearl {
+        cursor: pointer;
+      }
+
       .pearl:hover {
         background: rgba(25, 25, 35, 0.7);
         border-color: rgba(255, 255, 255, 0.1);
@@ -342,6 +341,99 @@
       #totalSummary small {
         color: #888;
         font-style: italic;
+      }
+
+      /* PEARL TIMING MODAL */
+      .pearl-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(4px);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .pearl-modal.active {
+        display: flex;
+      }
+
+      .pearl-modal-content {
+        background: rgba(30, 30, 45, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 28px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 211, 105, 0.3);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        position: relative;
+      }
+
+      .pearl-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .pearl-modal-header h3 {
+        background: linear-gradient(135deg, #ffd369 0%, #ffb347 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+        font-size: 1.3rem;
+      }
+
+      .pearl-modal-close {
+        background: none;
+        border: none;
+        color: #aaa;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+      }
+
+      .pearl-modal-close:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffd369;
+      }
+
+      .pearl-timing-item {
+        background: rgba(20, 20, 30, 0.6);
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        border-left: 3px solid rgba(255, 211, 105, 0.5);
+      }
+
+      .pearl-timing-item strong {
+        color: #ffd369;
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .pearl-timing-item small {
+        color: #aaa;
+        display: block;
+        font-size: 0.85rem;
+        line-height: 1.5;
       }
     </style>
   </head>
@@ -442,6 +534,17 @@
     </div>
 
     <div id="results"></div>
+
+    <!-- Pearl Timing Modal -->
+    <div id="pearlModal" class="pearl-modal">
+      <div class="pearl-modal-content">
+        <div class="pearl-modal-header">
+          <h3 id="modalTitle">Pearl Timing Details</h3>
+          <button class="pearl-modal-close" onclick="closePearlModal()">&times;</button>
+        </div>
+        <div id="modalContent"></div>
+      </div>
+    </div>
 
     <script>
       const pearlImages = {
@@ -719,18 +822,51 @@
           "Black Pearl",
         ];
 
+        // Store timing data for each pearl type by day
+        const pearlTimingData = {};
+        // Store all drops in chronological order for each day
+        const dayChronologicalData = {};
+
         for (let d = 1; d <= days; d++) {
           let day = {};
+          // Track when each pearl was obtained this day
+          const dayPearlTimings = {};
+          // Track all drops in chronological order for this day
+          const chronologicalDrops = [];
 
           for (let i = 0; i < clams; i++) {
             const r = rollOneClam();
             day[r] = (day[r] || 0) + 1;
             totals[r]++;
+            
+            // Track timing for each pearl drop
+            if (!dayPearlTimings[r]) {
+              dayPearlTimings[r] = [];
+            }
+            // Calculate: time from start of this day (not cumulative)
+            const timeFromDayStart = ((i + 1) / 41) * 5;
+            // Also track cumulative for time since previous calculations
+            const totalClamsSoFar = (d - 1) * clams + (i + 1);
+            const cumulativeTimeMinutes = (totalClamsSoFar / 41) * 5;
+            const dropData = {
+              type: r,
+              clam: totalClamsSoFar,
+              timeMinutes: timeFromDayStart, // Time from start of this day
+              cumulativeTimeMinutes: cumulativeTimeMinutes, // For calculating time since previous
+              day: d,
+              clamInDay: i + 1
+            };
+            dayPearlTimings[r].push(dropData);
+            chronologicalDrops.push(dropData);
           }
+
+          // Store timing data for this day
+          pearlTimingData[d] = dayPearlTimings;
+          dayChronologicalData[d] = chronologicalDrops;
 
           // 🔹 BUILD DAY CARD
           let card = `
-      <div class="day-box">
+      <div class="day-box" data-day="${d}" onclick="showDayTiming(${d})" style="cursor: pointer;">
         <h3>Day ${d}</h3>
         <small>Circles: ${circles.toFixed(2)} | Time: ${minutesPerDay.toFixed(2)} min</small>
         <div class="pearls-grid">
@@ -738,8 +874,9 @@
 
           for (let k of pearlOrder) {
             if (!day[k]) continue;
+            const pearlKey = `day-${d}-${k}`;
             card += `
-        <div class="pearl">
+        <div class="pearl" onclick="event.stopPropagation(); showPearlTiming(${d}, '${k.replace(/'/g, "\\'")}')" data-pearl-type="${k}" data-day="${d}">
           <img src="${pearlImages[k]}">
           <span>${k}: ${day[k]}</span>
         </div>`;
@@ -748,6 +885,10 @@
           card += `</div></div>`;
           if (resultsEl) resultsEl.innerHTML += card;
         }
+
+        // Store timing data globally for modal access
+        window.pearlTimingData = pearlTimingData;
+        window.dayChronologicalData = dayChronologicalData;
 
         // 🔹 DRAW CHART (with a small delay to ensure canvas is ready)
         setTimeout(() => {
@@ -788,6 +929,142 @@
         totalHTML += "</div></div>";
         if (totalSummaryEl) totalSummaryEl.innerHTML = totalHTML;
       }
+
+      function showPearlTiming(day, pearlType) {
+        const modal = document.getElementById("pearlModal");
+        const modalTitle = document.getElementById("modalTitle");
+        const modalContent = document.getElementById("modalContent");
+        
+        if (!modal || !window.pearlTimingData) return;
+        
+        // Get timing data for this pearl type on this day
+        const dayData = window.pearlTimingData[day];
+        if (!dayData || !dayData[pearlType] || dayData[pearlType].length === 0) {
+          modalContent.innerHTML = "<p style='color: #aaa;'>No timing data available for this pearl type on this day.</p>";
+        } else {
+          const timings = dayData[pearlType];
+          
+          modalTitle.textContent = `${pearlType} - Day ${day}`;
+          
+          let html = `<p style="color: #c8c8c8; margin-bottom: 16px; font-size: 0.9rem;">Found ${timings.length} ${timings.length === 1 ? 'drop' : 'drops'} on Day ${day}:</p>`;
+          
+          const color = pearlColors[pearlType] || "#888888";
+          
+          timings.forEach((timing, index) => {
+            // Use time from start of day (not cumulative)
+            const hours = Math.floor(timing.timeMinutes / 60);
+            const minutes = (timing.timeMinutes % 60).toFixed(1);
+            const timeDisplay = hours > 0 
+              ? `${hours}h ${minutes}min` 
+              : `${minutes}min`;
+            
+            // Calculate time since previous pearl of same type (if any)
+            // Use time from start of day since they're all on the same day
+            let timeSincePrevious = "";
+            if (index > 0) {
+              const prevTiming = timings[index - 1];
+              const timeDiff = timing.timeMinutes - prevTiming.timeMinutes;
+              const diffHours = Math.floor(timeDiff / 60);
+              const diffMinutes = (timeDiff % 60).toFixed(1);
+              const diffDisplay = diffHours > 0 
+                ? `${diffHours}h ${diffMinutes}min` 
+                : `${diffMinutes}min`;
+              timeSincePrevious = `<br>Time since previous: ${diffDisplay}`;
+            }
+            
+            html += `
+              <div class="pearl-timing-item" style="border-left-color: ${color};">
+                <strong>Drop #${index + 1}</strong>
+                <small>
+                  ${timing.clamInDay}${timing.clamInDay === 1 ? 'st' : timing.clamInDay === 2 ? 'nd' : timing.clamInDay === 3 ? 'rd' : 'th'} clam on Day ${day}<br>
+                  Time from start of day: ${timeDisplay}${timeSincePrevious}
+                </small>
+              </div>
+            `;
+          });
+          
+          modalContent.innerHTML = html;
+        }
+        
+        modal.classList.add("active");
+      }
+
+      function showDayTiming(day) {
+        const modal = document.getElementById("pearlModal");
+        const modalTitle = document.getElementById("modalTitle");
+        const modalContent = document.getElementById("modalContent");
+        
+        if (!modal || !window.dayChronologicalData) return;
+        
+        // Get chronological data for this day
+        const dayData = window.dayChronologicalData[day];
+        if (!dayData || dayData.length === 0) {
+          modalContent.innerHTML = "<p style='color: #aaa;'>No data available for this day.</p>";
+        } else {
+          modalTitle.textContent = `Day ${day} - All Drops (Chronological Order)`;
+          
+          let html = `<p style="color: #c8c8c8; margin-bottom: 16px; font-size: 0.9rem;">All ${dayData.length} drops on Day ${day} in order:</p>`;
+          
+          dayData.forEach((drop, index) => {
+            const hours = Math.floor(drop.timeMinutes / 60);
+            const minutes = (drop.timeMinutes % 60).toFixed(1);
+            const timeDisplay = hours > 0 
+              ? `${hours}h ${minutes}min` 
+              : `${minutes}min`;
+            
+            // Calculate time since previous drop (if any)
+            let timeSincePrevious = "";
+            if (index > 0) {
+              const prevDrop = dayData[index - 1];
+              const timeDiff = drop.timeMinutes - prevDrop.timeMinutes;
+              const diffHours = Math.floor(timeDiff / 60);
+              const diffMinutes = (timeDiff % 60).toFixed(1);
+              const diffDisplay = diffHours > 0 
+                ? `${diffHours}h ${diffMinutes}min` 
+                : `${diffMinutes}min`;
+              timeSincePrevious = `<br>Time since previous: ${diffDisplay}`;
+            }
+            
+            const color = pearlColors[drop.type] || "#888888";
+            
+            html += `
+              <div class="pearl-timing-item" style="border-left-color: ${color};">
+                <strong>#${index + 1} - ${drop.type}</strong>
+                <small>
+                  ${drop.clamInDay}${drop.clamInDay === 1 ? 'st' : drop.clamInDay === 2 ? 'nd' : drop.clamInDay === 3 ? 'rd' : 'th'} clam on Day ${day}<br>
+                  Time from start of day: ${timeDisplay}${timeSincePrevious}
+                </small>
+              </div>
+            `;
+          });
+          
+          modalContent.innerHTML = html;
+        }
+        
+        modal.classList.add("active");
+      }
+
+      function closePearlModal() {
+        const modal = document.getElementById("pearlModal");
+        if (modal) {
+          modal.classList.remove("active");
+        }
+      }
+
+      // Close modal when clicking outside
+      document.addEventListener("click", function(event) {
+        const modal = document.getElementById("pearlModal");
+        if (modal && event.target === modal) {
+          closePearlModal();
+        }
+      });
+
+      // Close modal with Escape key
+      document.addEventListener("keydown", function(event) {
+        if (event.key === "Escape") {
+          closePearlModal();
+        }
+      });
     </script>
   </body>
 </html>
