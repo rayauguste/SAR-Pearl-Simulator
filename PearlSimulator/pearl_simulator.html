@@ -1394,6 +1394,13 @@
                 ? `${hours}h ${minutes}min` 
                 : `${minutes}min`;
               
+              // Calculate cumulative time from start of simulation
+              const cumHours = Math.floor(timing.cumulativeTimeMinutes / 60);
+              const cumMinutes = (timing.cumulativeTimeMinutes % 60).toFixed(1);
+              const cumTimeDisplay = cumHours > 0 
+                ? `${cumHours}h ${cumMinutes}min` 
+                : `${cumMinutes}min`;
+              
               html += `
                 <div class="pearl-timing-item">
                   <img src="${pearlImages[pearlType]}" alt="${pearlType}">
@@ -1401,7 +1408,8 @@
                     <strong>Drop #${index + 1}</strong>
                     <small>
                       ${timing.clamInDay}${timing.clamInDay === 1 ? 'st' : timing.clamInDay === 2 ? 'nd' : timing.clamInDay === 3 ? 'rd' : 'th'} clam on Day ${day}<br>
-                      Time from start of day: ${timeDisplay}
+                      Time from start of day: ${timeDisplay}<br>
+                      <span style="color: #aaa;">Time from start of simulation: ${cumTimeDisplay}</span>
                     </small>
                   </div>
       </div>
@@ -1437,6 +1445,13 @@
               ? `${hours}h ${minutes}min` 
               : `${minutes}min`;
             
+            // Calculate cumulative time from start of simulation
+            const cumHours = Math.floor(drop.cumulativeTimeMinutes / 60);
+            const cumMinutes = (drop.cumulativeTimeMinutes % 60).toFixed(1);
+            const cumTimeDisplay = cumHours > 0 
+              ? `${cumHours}h ${cumMinutes}min` 
+              : `${cumMinutes}min`;
+            
             html += `
               <div class="pearl-timing-item">
                 <img src="${pearlImages[drop.type]}" alt="${drop.type}">
@@ -1444,7 +1459,8 @@
                   <strong>#${index + 1} - ${drop.type}</strong>
                   <small>
                     ${drop.clamInDay}${drop.clamInDay === 1 ? 'st' : drop.clamInDay === 2 ? 'nd' : drop.clamInDay === 3 ? 'rd' : 'th'} clam on Day ${day}<br>
-                    Time from start of day: ${timeDisplay}
+                    Time from start of day: ${timeDisplay}<br>
+                    <span style="color: #aaa;">Time from start of simulation: ${cumTimeDisplay}</span>
                   </small>
                 </div>
               </div>
@@ -1495,6 +1511,13 @@
               ? `${hours}h ${minutes}min` 
               : `${minutes}min`;
             
+            // Calculate cumulative time from start of simulation
+            const cumHours = Math.floor(drop.cumulativeTimeMinutes / 60);
+            const cumMinutes = (drop.cumulativeTimeMinutes % 60).toFixed(1);
+            const cumTimeDisplay = cumHours > 0 
+              ? `${cumHours}h ${cumMinutes}min` 
+              : `${cumMinutes}min`;
+            
             html += `
               <div class="pearl-timing-item">
                 <img src="${pearlImages[pearlType]}" alt="${pearlType}">
@@ -1502,7 +1525,8 @@
                   <strong>#${index + 1} - Day ${drop.day}</strong>
                   <small>
                     ${drop.clamInDay}${drop.clamInDay === 1 ? 'st' : drop.clamInDay === 2 ? 'nd' : drop.clamInDay === 3 ? 'rd' : 'th'} clam on Day ${drop.day}<br>
-                    Time from start of day: ${timeDisplay}
+                    Time from start of day: ${timeDisplay}<br>
+                    <span style="color: #aaa;">Time from start of simulation: ${cumTimeDisplay}</span>
                   </small>
                 </div>
               </div>
@@ -1552,6 +1576,13 @@
               ? `${hours}h ${minutes}min` 
               : `${minutes}min`;
             
+            // Calculate cumulative time from start of simulation
+            const cumHours = Math.floor(drop.cumulativeTimeMinutes / 60);
+            const cumMinutes = (drop.cumulativeTimeMinutes % 60).toFixed(1);
+            const cumTimeDisplay = cumHours > 0 
+              ? `${cumHours}h ${cumMinutes}min` 
+              : `${cumMinutes}min`;
+            
             html += `
               <div class="pearl-timing-item">
                 <img src="${pearlImages[drop.type]}" alt="${drop.type}">
@@ -1559,7 +1590,8 @@
                   <strong>#${index + 1} - ${drop.type} (Day ${drop.day})</strong>
                   <small>
                     ${drop.clamInDay}${drop.clamInDay === 1 ? 'st' : drop.clamInDay === 2 ? 'nd' : drop.clamInDay === 3 ? 'rd' : 'th'} clam on Day ${drop.day}<br>
-                    Time from start of day: ${timeDisplay}
+                    Time from start of day: ${timeDisplay}<br>
+                    <span style="color: #aaa;">Time from start of simulation: ${cumTimeDisplay}</span>
                   </small>
                 </div>
               </div>
