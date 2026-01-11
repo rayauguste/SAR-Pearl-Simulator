@@ -17,8 +17,6 @@ By testing out different scenarios with the actual drop rates, you can see ahead
 
 - Simulate pearl drops across multiple days
 - Customizable drop probability rates for each pearl type (Black, Gold, Purple, Blue, Green, White)
-- Customizable island loop settings (clams per loop and time per loop)
-- Odds calculator to see probability of finding each pearl type
 - Visual chart showing pearl distribution
 - Day-by-day breakdown of results
 - Total summary statistics across all simulated days
@@ -54,20 +52,14 @@ That's it! The simulator will load in your browser and you can start using it im
 1. **Set Simulation Parameters:**
    - Enter the number of clams you collect per day
    - Set how many days you want to simulate
-   - Configure clams per island loop (default: 41)
-   - Configure minutes per island loop (default: 5)
+   - Configure clams on island (default: 41) - the number of clams available on the island
+   - Configure minutes per loop (default: 5) - the time it takes to complete one loop around the island
 
 2. **Adjust Drop Chances (Optional):**
    - Modify the probability values (0-1) for each pearl type
    - Default values represent rare drop rates
 
-3. **Use Odds Calculator (Optional):**
-   - Expand the "Odds Calculator" section
-   - Enter the number of clams you want to test
-   - See the probability of finding at least one of each pearl type
-   - Uses the drop chances from your settings above
-
-4. **Run Simulation:**
+3. **Run Simulation:**
    - Click the **"Run Simulation"** button
    - Scroll down to view day-by-day results
    - Check the summary box for total statistics and visual chart
@@ -80,10 +72,11 @@ That's it! The simulator will load in your browser and you can start using it im
 
 ## Notes
 
-- The simulator assumes perfect island loops with all clams untouched (configurable in settings)
-- Default settings: 41 clams per island loop, 5 minutes per island loop (both customizable)
+- The simulator assumes perfect island loops with all clams untouched
+- Default settings assume 41 clams on island and 5 minutes per loop (configurable)
 - Results represent idealized outcomes without player interference
 - All image files (black.png, gold.png, purple.png, blue.png, green.png, white.png, empty.png) must be in the same directory as `index.html` for the simulator to work correctly
+- You can customize the number of clams on island and time per loop to match your actual gameplay
 
 ## File Structure
 

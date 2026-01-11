@@ -580,7 +580,7 @@
       }
 
       .info-icon:hover::after {
-        content: "Each day = perfect island loop with all clams untouched. Time calculations based on your configured minutes per loop. Results show idealized outcomes.";
+        content: "Each day = perfect island loop with all clams on island untouched. Time calculations based on your configured minutes per loop. Results show idealized outcomes.";
         position: absolute;
         bottom: calc(100% + 10px);
         left: 50%;
@@ -857,10 +857,10 @@
             <label>Days to simulate</label>
             <input id="daysToSim" type="number" value="50" min="1" max="365" />
 
-            <label style="margin-top: 16px;">Clams per island loop</label>
+            <label>Clams on island</label>
             <input id="clamsPerLoop" type="number" value="41" min="1" />
 
-            <label>Minutes per island loop</label>
+            <label>Minutes per loop</label>
             <input id="minutesPerLoop" type="number" value="5" min="0.1" step="0.1" />
 
             <div style="margin-top: 24px;">
@@ -1576,7 +1576,7 @@
         let totals = {};
         Object.keys(pearlImages).forEach((k) => (totals[k] = 0));
 
-          const clams = +clamsPerDay.value;
+        const clams = +clamsPerDay.value;
           let days = +daysToSim.value;
           const clamsPerLoop = +document.getElementById("clamsPerLoop").value || 41;
           const minutesPerLoop = +document.getElementById("minutesPerLoop").value || 5;
@@ -1761,10 +1761,10 @@
         const totalSummaryEl = document.getElementById("totalSummary");
         if (!totalSummaryEl) return;
         
-        let totalClams, totalLaps, totalMinutes, totalHours, titleText, clickHandler;
-        
         const clamsPerLoop = +document.getElementById("clamsPerLoop").value || 41;
         const minutesPerLoop = +document.getElementById("minutesPerLoop").value || 5;
+        
+        let totalClams, totalLaps, totalMinutes, totalHours, titleText, clickHandler;
         
         if (selectedDay && window.dayTotals && window.dayTotals[selectedDay]) {
           // Single day summary
