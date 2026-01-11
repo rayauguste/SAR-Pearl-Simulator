@@ -1108,12 +1108,40 @@
             return [k, typeof value === 'number' ? value : 0];
           });
           
-          // Calculate max value, but ensure it's at least 1 to avoid division by zero
-          const values = entries.map((e) => {
-            const val = e[1];
-            return (typeof val === 'number' && !isNaN(val) && isFinite(val)) ? val : 0;
-          });
-          const max = Math.max(1, ...values);
+          // Calculate max based on view mode:
+          // - All Days: use all-days totals max
+          // - Single Day: use the highest single-day max across all days (for consistent scaling)
+          let max;
+          if (selectedDay !== null && window.dayTotals) {
+            // Single day view - use the highest max from any single day for consistent scaling
+            let highestSingleDayMax = 1;
+            Object.keys(window.dayTotals).forEach(day => {
+              const dayTotals = window.dayTotals[day];
+              const dayValues = pearlOrder.map((k) => {
+                const val = dayTotals[k] || 0;
+                return (typeof val === 'number' && !isNaN(val) && isFinite(val)) ? val : 0;
+              });
+              const dayMax = Math.max(1, ...dayValues);
+              if (dayMax > highestSingleDayMax) {
+                highestSingleDayMax = dayMax;
+              }
+            });
+            max = highestSingleDayMax;
+          } else if (window.allDaysTotals) {
+            // All Days view - use all-days totals max
+            const allDaysValues = pearlOrder.map((k) => {
+              const val = window.allDaysTotals[k] || 0;
+              return (typeof val === 'number' && !isNaN(val) && isFinite(val)) ? val : 0;
+            });
+            max = Math.max(1, ...allDaysValues);
+          } else {
+            // Fallback to current data max
+            const values = entries.map((e) => {
+              const val = e[1];
+              return (typeof val === 'number' && !isNaN(val) && isFinite(val)) ? val : 0;
+            });
+            max = Math.max(1, ...values);
+          }
           
           if (!isFinite(max) || max <= 0) {
             console.error("Invalid max value:", max);
@@ -1375,7 +1403,7 @@
           });
 
           if (clickedBar) {
-            // If viewing a specific day, show that day's data, otherwise show all days
+            // Always use selectedDay if it's not null (viewing a specific day)
             if (selectedDay !== null) {
               showPearlTiming(selectedDay, clickedBar.type);
             } else {
@@ -1871,7 +1899,8 @@
         // Get timing data for this pearl type on this day
         const dayData = window.pearlTimingData[day];
         if (!dayData || !dayData[pearlType] || dayData[pearlType].length === 0) {
-          modalDescription.textContent = "";
+          modalTitle.textContent = `${pearlType} - Day ${day}`;
+          modalDescription.textContent = "No drops found on this day.";
           modalContent.innerHTML = "<p style='color: #aaa;'>No timing data available for this pearl type on this day.</p>";
         } else {
           const timings = dayData[pearlType];
@@ -1997,7 +2026,8 @@
         allDrops.sort((a, b) => a.cumulativeTimeMinutes - b.cumulativeTimeMinutes);
         
         if (allDrops.length === 0) {
-          modalDescription.textContent = "";
+          modalTitle.textContent = `${pearlType} - All Days`;
+          modalDescription.textContent = "No drops found across all days.";
           modalContent.innerHTML = "<p style='color: #aaa;'>No drops found for this pearl type.</p>";
         } else {
           modalTitle.textContent = `${pearlType} - All Days`;
