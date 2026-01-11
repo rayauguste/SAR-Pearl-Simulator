@@ -843,59 +843,59 @@
 
     <div class="top-layout">
       <div class="combined-box">
-        <!-- LEFT: Settings -->
-        <div class="config-section">
-        <h3>Simulation Settings</h3>
-          <p style="color: #dddddd; font-size: 14px; line-height: 1.4; margin-bottom: 20px">
-          Set the number of clams per day and how many days to simulate. Adjust
-          the drop chances for each pearl color to see how your results change.
-        </p>
+          <!-- LEFT: Settings -->
+          <div class="config-section">
+            <h3>Simulation Settings</h3>
+            <p style="color: #dddddd; font-size: 14px; line-height: 1.4; margin-bottom: 20px">
+              Set the number of clams per day and how many days to simulate. Adjust
+              the drop chances for each pearl color to see how your results change.
+            </p>
 
-        <label>Clams per day</label>
-        <input id="clamsPerDay" type="number" value="150" />
+            <label>Clams per day</label>
+            <input id="clamsPerDay" type="number" value="150" />
 
-        <label>Days to simulate</label>
-        <input id="daysToSim" type="number" value="50" min="1" max="365" />
+            <label>Days to simulate</label>
+            <input id="daysToSim" type="number" value="50" min="1" max="365" />
 
-        <div style="margin-top: 24px;">
-          <div class="collapsible-header" onclick="toggleDropChances()">
-            <h3 style="margin: 0;">Drop Chances (Optional)</h3>
-            <span id="dropChancesToggle" class="collapsible-toggle collapsed">▼</span>
-          </div>
-          <div id="dropChancesContent" class="collapsible-content collapsed">
-            <p style="color: #dddddd; font-size: 14px; line-height: 1.4; margin-bottom: 16px; margin-top: 12px;">
-          Adjust the probability (0-1) for each pearl type to drop from a clam.
-          These default values represent the rare drop rates.
-        </p>
+            <div style="margin-top: 24px;">
+              <div class="collapsible-header" onclick="toggleDropChances()">
+                <h3 style="margin: 0;">Drop Chances (Optional)</h3>
+                <span id="dropChancesToggle" class="collapsible-toggle collapsed">▼</span>
+              </div>
+              <div id="dropChancesContent" class="collapsible-content collapsed">
+                <p style="color: #dddddd; font-size: 14px; line-height: 1.4; margin-bottom: 16px; margin-top: 12px;">
+                  Adjust the probability (0-1) for each pearl type to drop from a clam.
+                  These default values represent the rare drop rates.
+                </p>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px;">
-              <div>
-        <label>Black</label>
-                <input id="pBlack" type="number" step="0.00001" value="0.0001" />
-              </div>
-              <div>
-        <label>Gold</label>
-                <input id="pGold" type="number" step="0.00001" value="0.001" />
-              </div>
-              <div>
-        <label>Purple</label>
-                <input id="pPurple" type="number" step="0.00001" value="0.0139" />
-              </div>
-              <div>
-        <label>Blue</label>
-                <input id="pBlue" type="number" step="0.00001" value="0.045" />
-              </div>
-              <div>
-        <label>Green</label>
-                <input id="pGreen" type="number" step="0.00001" value="0.1" />
-              </div>
-              <div>
-        <label>White</label>
-                <input id="pWhite" type="number" step="0.00001" value="0.4" />
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px;">
+                  <div>
+                    <label>Black</label>
+                    <input id="pBlack" type="number" step="0.00001" value="0.0001" />
+                  </div>
+                  <div>
+                    <label>Gold</label>
+                    <input id="pGold" type="number" step="0.00001" value="0.001" />
+                  </div>
+                  <div>
+                    <label>Purple</label>
+                    <input id="pPurple" type="number" step="0.00001" value="0.0139" />
+                  </div>
+                  <div>
+                    <label>Blue</label>
+                    <input id="pBlue" type="number" step="0.00001" value="0.045" />
+                  </div>
+                  <div>
+                    <label>Green</label>
+                    <input id="pGreen" type="number" step="0.00001" value="0.1" />
+                  </div>
+                  <div>
+                    <label>White</label>
+                    <input id="pWhite" type="number" step="0.00001" value="0.4" />
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
         <div style="margin-top: 24px; margin-bottom: 32px;">
           <div class="collapsible-header" onclick="toggleOddsCalculator()">
@@ -918,14 +918,14 @@
           </div>
         </div>
 
-        <button id="simulateButton" onclick="runSimulation()">Run Simulation</button>
-        <div
-          id="scrollHint"
-          style="color: #ffd369; margin-top: 6px; display: none"
-        >
-          ⬇ Scroll down to see results!
-        </div>
-      </div>
+            <button id="simulateButton" onclick="runSimulation()">Run Simulation</button>
+            <div
+              id="scrollHint"
+              style="color: #ffd369; margin-top: 6px; display: none"
+            >
+              ⬇ Scroll down to see results!
+            </div>
+          </div>
 
         <!-- MIDDLE: Chart -->
         <div class="chart-section">
@@ -1046,7 +1046,7 @@
       function toggleOddsCalculator() {
         const content = document.getElementById("oddsCalculatorContent");
         const toggle = document.getElementById("oddsCalculatorToggle");
-        
+
         if (content && toggle) {
           content.classList.toggle("collapsed");
           toggle.classList.toggle("collapsed");
@@ -1061,12 +1061,12 @@
         
         try {
           const clamCount = parseInt(clamCountInput.value);
-          
+
           if (isNaN(clamCount) || clamCount < 1) {
             resultsDiv.innerHTML = '<small style="color: #ff6b6b;">Please enter a valid number of clams (at least 1).</small>';
             return;
           }
-          
+
           const p = getProbabilities();
           const pearlOrder = [
             "Black Pearl",
@@ -1089,19 +1089,19 @@
               odds = 1 - Math.pow(1 - probability, clamCount);
             } else if (probability >= 1) {
               odds = 1;
-            } else {
+          } else {
               odds = 0;
             }
             
             const percentage = odds * 100;
             const scientific = odds.toExponential(4);
-            
-            let displayText = '';
-            if (percentage >= 0.01) {
+          
+          let displayText = '';
+          if (percentage >= 0.01) {
               displayText = `${percentage.toFixed(2)}%`;
             } else if (percentage > 0) {
               displayText = `${percentage.toFixed(6)}%`;
-            } else {
+          } else {
               displayText = '0%';
             }
             
@@ -1111,9 +1111,9 @@
                 <div style="flex: 1;">
                   <div style="color: #e0e0e0; font-weight: 500; font-size: 0.95rem;">${pearlType}</div>
                   <div style="color: #ffd369; font-size: 1.1rem; font-weight: 600; margin-top: 4px;">${displayText}</div>
-                </div>
               </div>
-            `;
+            </div>
+          `;
           });
           
           html += '</div>';
