@@ -100,6 +100,34 @@
         min-width: 300px;
       }
 
+      .day-filter-dropdown {
+        margin-bottom: 16px;
+      }
+
+      .day-filter-dropdown select {
+        width: 100%;
+        max-width: 300px;
+        padding: 10px 14px;
+        background: rgba(30, 30, 45, 0.8);
+        border: 1px solid rgba(255, 211, 105, 0.3);
+        border-radius: 8px;
+        color: #ddd;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .day-filter-dropdown select:hover {
+        border-color: rgba(255, 211, 105, 0.5);
+        background: rgba(35, 35, 50, 0.9);
+      }
+
+      .day-filter-dropdown select:focus {
+        outline: none;
+        border-color: rgba(255, 211, 105, 0.7);
+        background: rgba(40, 40, 55, 0.95);
+      }
+
       .config-section h3 {
         margin-top: 0;
       }
@@ -881,6 +909,11 @@
         <!-- MIDDLE: Chart -->
         <div class="chart-section">
           <h3 class="summary-title">Results Chart</h3>
+          <div id="dayFilterDropdown" class="day-filter-dropdown" style="display: none;">
+            <select id="dayFilterSelect">
+              <!-- Options will be populated by JavaScript -->
+            </select>
+          </div>
           <p style="color: #c8c8c8; font-size: 0.9rem; line-height: 1.6; margin-bottom: 16px;">
             <strong style="color: #ffd369;">Hover</strong> over bars for details, <strong style="color: #ffd369;">click</strong> to see all drops of that type.
             <span class="info-icon">i</span>
@@ -1028,7 +1061,7 @@
       // Store bar positions for interactivity
       let chartBarPositions = [];
 
-      function drawChart(totals, days) {
+      function drawChart(totals, days, selectedDay = null) {
         try {
         const c = document.getElementById("chart");
           if (!c) {
@@ -1064,9 +1097,14 @@
             "Empty Clam"
           ];
           
+          // Use selected day totals if provided, otherwise use all days totals
+          const dataToUse = selectedDay && window.dayTotals && window.dayTotals[selectedDay] 
+            ? window.dayTotals[selectedDay] 
+            : totals;
+          
           // Get values for all pearls, defaulting to 0 if not present
           const entries = pearlOrder.map((k) => {
-            const value = totals[k] || 0;
+            const value = dataToUse[k] || 0;
             return [k, typeof value === 'number' ? value : 0];
           });
           
@@ -1213,13 +1251,13 @@
           ctx.stroke();
           
           // Add mouse event listeners for interactivity (after all drawing is complete)
-          setupChartInteractivity(c, totals, days);
+          setupChartInteractivity(c, totals, days, selectedDay);
         } catch (error) {
           console.error("Error drawing chart:", error);
         }
       }
 
-      function setupChartInteractivity(canvas, totals, days) {
+      function setupChartInteractivity(canvas, totals, days, selectedDay = null) {
         const tooltip = document.getElementById("chartTooltip");
         if (!tooltip) return;
 
@@ -1245,17 +1283,24 @@
             const percent = totals[hoveredBar.type] && totalDrops > 0
               ? ((totals[hoveredBar.type] / totalDrops) * 100).toFixed(2)
               : "0.00";
-            const avgPerDay = days > 0 
-              ? (hoveredBar.value / days).toFixed(2)
-              : "0.00";
             
-            tooltip.innerHTML = `
+            let tooltipContent = `
               <strong>${hoveredBar.type}</strong>
               <small>Total: ${hoveredBar.value.toLocaleString()}</small>
               <small>Percentage: ${percent}%</small>
-              <small>Average drops per day: ${avgPerDay}</small>
-              <small style="color: #ffd369; margin-top: 4px; font-size: 0.75rem;">Click to see all drops</small>
             `;
+            
+            // Only show average per day if viewing all days
+            if (selectedDay === null) {
+              const avgPerDay = days > 0 
+                ? (hoveredBar.value / days).toFixed(2)
+                : "0.00";
+              tooltipContent += `<small>Average drops per day: ${avgPerDay}</small>`;
+            }
+            
+            tooltipContent += `<small style="color: #ffd369; margin-top: 4px; font-size: 0.75rem;">Click to see drops</small>`;
+            
+            tooltip.innerHTML = tooltipContent;
             
             tooltip.classList.add("active");
             tooltip.style.left = (event.clientX - rect.left + 15) + "px";
@@ -1295,7 +1340,12 @@
           });
 
           if (clickedBar) {
-            showTotalPearlTiming(clickedBar.type);
+            // If viewing a specific day, show that day's data, otherwise show all days
+            if (selectedDay !== null) {
+              showPearlTiming(selectedDay, clickedBar.type);
+            } else {
+              showTotalPearlTiming(clickedBar.type);
+            }
           }
         }
 
@@ -1419,6 +1469,12 @@
             // Store timing data for this day
             pearlTimingData[d] = dayPearlTimings;
             dayChronologicalData[d] = chronologicalDrops;
+            
+            // Store totals for this day
+            const dayTotalsCopy = {};
+            Object.keys(pearlImages).forEach((k) => (dayTotalsCopy[k] = day[k] || 0));
+            if (!window.dayTotals) window.dayTotals = {};
+            window.dayTotals[d] = dayTotalsCopy;
 
           // 🔹 BUILD DAY CARD
             // Calculate total drops for this day for tooltip
@@ -1505,29 +1561,19 @@
           // Store timing data globally for modal access
           window.pearlTimingData = pearlTimingData;
           window.dayChronologicalData = dayChronologicalData;
+          
+          // Store all-days totals for filtering
+          window.allDaysTotals = totals;
+          window.allDays = days;
 
           // 🔹 DRAW CHART (with a small delay to ensure canvas is ready)
           setTimeout(() => {
             drawChart(totals, days);
+            updateDayFilterDropdown(days);
           }, 50);
 
         // 🔹 TOTAL SUMMARY
-        let totalClams = clams * days;
-          let totalLaps = (clams / 41) * days;
-          let totalMinutes = totalLaps * 5;
-        let totalHours = (totalMinutes / 60).toFixed(2);
-
-        let totalHTML = `
-            <div onclick="showAllDaysTiming()" style="background: rgba(20, 20, 30, 0.6); padding: 16px; border-radius: 8px; margin-top: 16px; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(25, 25, 35, 0.7)'" onmouseout="this.style.background='rgba(20, 20, 30, 0.6)'">
-              <h4 style="color: #ffd369; margin: 0 0 12px 0; font-size: 1.1rem;">Summary <small style="color: #aaa; font-size: 0.8rem; font-weight: normal;">(Click to see all drops)</small></h4>
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-                <div><small style="color: #aaa;">Total laps:</small><br><strong style="color: #ffd369;">${totalLaps.toFixed(2)}</strong></div>
-                <div><small style="color: #aaa;">Total time:</small><br><strong style="color: #ffd369;">${totalHours} hours</strong></div>
-                <div><small style="color: #aaa;">Total clams opened:</small><br><strong style="color: #ffd369;">${totalClams.toLocaleString()}</strong></div>
-              </div>
-            </div>
-          `;
-          if (totalSummaryEl) totalSummaryEl.innerHTML = totalHTML;
+        updateSummary(null, clams, days);
           
           // Update button text to "Rerun Simulation" and re-enable
           if (simulateButton) {
@@ -1535,6 +1581,93 @@
             simulateButton.disabled = false;
           }
         }, 100); // End of setTimeout - allows loading animation to render
+      }
+
+      // Day Filter Functions
+      function updateSummary(selectedDay, clams, days) {
+        const totalSummaryEl = document.getElementById("totalSummary");
+        if (!totalSummaryEl) return;
+        
+        let totalClams, totalLaps, totalMinutes, totalHours, titleText, clickHandler;
+        
+        if (selectedDay && window.dayTotals && window.dayTotals[selectedDay]) {
+          // Single day summary
+          totalClams = clams;
+          totalLaps = clams / 41;
+          totalMinutes = totalLaps * 5;
+          totalHours = (totalMinutes / 60).toFixed(2);
+          titleText = `Day ${selectedDay} Summary <small style="color: #aaa; font-size: 0.8rem; font-weight: normal;">(Click to see all drops)</small>`;
+          clickHandler = `showDayTiming(${selectedDay})`;
+        } else {
+          // All days summary
+          totalClams = clams * days;
+          totalLaps = (clams / 41) * days;
+          totalMinutes = totalLaps * 5;
+          totalHours = (totalMinutes / 60).toFixed(2);
+          titleText = `Summary <small style="color: #aaa; font-size: 0.8rem; font-weight: normal;">(Click to see all drops)</small>`;
+          clickHandler = `showAllDaysTiming()`;
+        }
+        
+        const totalHTML = `
+          <div onclick="${clickHandler}" style="background: rgba(20, 20, 30, 0.6); padding: 16px; border-radius: 8px; margin-top: 16px; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(25, 25, 35, 0.7)'" onmouseout="this.style.background='rgba(20, 20, 30, 0.6)'">
+            <h4 style="color: #ffd369; margin: 0 0 12px 0; font-size: 1.1rem;">${titleText}</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+              <div><small style="color: #aaa;">Total laps:</small><br><strong style="color: #ffd369;">${totalLaps.toFixed(2)}</strong></div>
+              <div><small style="color: #aaa;">Total time:</small><br><strong style="color: #ffd369;">${totalHours} hours</strong></div>
+              <div><small style="color: #aaa;">Total clams opened:</small><br><strong style="color: #ffd369;">${totalClams.toLocaleString()}</strong></div>
+            </div>
+          </div>
+        `;
+        totalSummaryEl.innerHTML = totalHTML;
+      }
+      
+      function updateDayFilterDropdown(days) {
+        const dropdownContainer = document.getElementById("dayFilterDropdown");
+        const selectElement = document.getElementById("dayFilterSelect");
+        if (!dropdownContainer || !selectElement) return;
+        
+        selectElement.innerHTML = '';
+        
+        // Add "All Days" option
+        const allDaysOption = document.createElement("option");
+        allDaysOption.value = "all";
+        allDaysOption.textContent = "All Days";
+        allDaysOption.selected = true;
+        selectElement.appendChild(allDaysOption);
+        
+        // Add individual day options
+        for (let d = 1; d <= days; d++) {
+          const dayOption = document.createElement("option");
+          dayOption.value = d;
+          dayOption.textContent = `Day ${d}`;
+          selectElement.appendChild(dayOption);
+        }
+        
+        // Show dropdown container
+        dropdownContainer.style.display = "block";
+        
+        // Add event listener for dropdown change
+        selectElement.onchange = function() {
+          const selectedValue = this.value;
+          const selectedDay = selectedValue === "all" ? null : parseInt(selectedValue);
+          handleDayFilterChange(selectedDay);
+        };
+      }
+      
+      function handleDayFilterChange(selectedDay) {
+        // Update chart
+        const totals = selectedDay && window.dayTotals && window.dayTotals[selectedDay]
+          ? window.dayTotals[selectedDay]
+          : window.allDaysTotals;
+        const days = window.allDays || 50;
+        drawChart(totals, days, selectedDay);
+        
+        // Update summary
+        const clamsPerDay = document.getElementById("clamsPerDay");
+        const daysToSim = document.getElementById("daysToSim");
+        const clams = clamsPerDay ? +clamsPerDay.value : 150;
+        const totalDays = daysToSim ? +daysToSim.value : 50;
+        updateSummary(selectedDay, clams, totalDays);
       }
 
       // Filter Functions
