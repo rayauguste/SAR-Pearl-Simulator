@@ -72,17 +72,27 @@ That's it! The simulator will load in your browser and you can start using it im
 
 - The simulator assumes perfect island loops with all 41 clams untouched
 - Results represent idealized outcomes without player interference
-- Pearl images should be placed in the same directory as the HTML file (if using custom images)
+- All image files (black.png, gold.png, purple.png, blue.png, green.png, white.png, empty.png) must be in the same directory as `index.html` for the simulator to work correctly
 
 ## File Structure
 
+When you download and extract the repository, your folder structure will look like this:
+
 ```
-PearlSimulator/
-├── index.html            (Main application file)
-├── favicon.ico           (Favicon icon file)
-├── README.md             (This file)
-└── [pearl image files]   (Optional: black.png, gold.png, purple.png, etc.)
+PearlSimulator/              (or PearlSimulator-main/ if downloaded as ZIP)
+├── index.html               (Main application file - open this in your browser)
+├── favicon.ico              (Favicon icon file)
+├── README.md                (This documentation file)
+├── black.png                (Black pearl image)
+├── gold.png                 (Gold pearl image)
+├── purple.png               (Purple pearl image)
+├── blue.png                 (Blue pearl image)
+├── green.png                (Green pearl image)
+├── white.png                (White pearl image)
+└── empty.png                (Empty clam image)
 ```
+
+**Important:** All files must be in the same folder (root directory). The simulator requires `index.html`, `favicon.ico`, and all image files to be in the same location for everything to work correctly.
 
 ## Troubleshooting
 
