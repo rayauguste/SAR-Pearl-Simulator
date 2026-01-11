@@ -897,6 +897,27 @@
           </div>
         </div>
 
+        <div style="margin-top: 24px;">
+          <div class="collapsible-header" onclick="toggleOddsCalculator()">
+            <h3 style="margin: 0;">Odds Calculator</h3>
+            <span id="oddsCalculatorToggle" class="collapsible-toggle collapsed">▼</span>
+          </div>
+          <div id="oddsCalculatorContent" class="collapsible-content collapsed">
+            <p style="color: #dddddd; font-size: 14px; line-height: 1.4; margin-bottom: 16px; margin-top: 12px;">
+              Calculate the probability of finding each pearl type based on the number of clams you open. Uses the pearl drop chances from the Drop Chances settings above.
+            </p>
+
+            <label>Number of clams</label>
+            <input id="oddsClamCount" type="number" value="100" min="1" style="width: 100%; padding: 10px 14px; margin-bottom: 16px;" />
+
+            <button onclick="calculateOdds()" style="width: 100%; margin-bottom: 16px; padding: 10px; font-size: 0.95rem;">Calculate Odds</button>
+
+            <div id="oddsResults" style="background: rgba(20, 20, 30, 0.6); padding: 16px; border-radius: 8px; min-height: 60px;">
+              <small style="color: #888;">Enter number of clams and click Calculate</small>
+            </div>
+          </div>
+        </div>
+
         <button id="simulateButton" onclick="runSimulation()">Run Simulation</button>
         <div
           id="scrollHint"
@@ -1019,6 +1040,87 @@
         if (content && toggle) {
           content.classList.toggle("collapsed");
           toggle.classList.toggle("collapsed");
+        }
+      }
+
+      function toggleOddsCalculator() {
+        const content = document.getElementById("oddsCalculatorContent");
+        const toggle = document.getElementById("oddsCalculatorToggle");
+        
+        if (content && toggle) {
+          content.classList.toggle("collapsed");
+          toggle.classList.toggle("collapsed");
+        }
+      }
+
+      function calculateOdds() {
+        const resultsDiv = document.getElementById("oddsResults");
+        const clamCountInput = document.getElementById("oddsClamCount");
+        
+        if (!resultsDiv || !clamCountInput) return;
+        
+        try {
+          const clamCount = parseInt(clamCountInput.value);
+          
+          if (isNaN(clamCount) || clamCount < 1) {
+            resultsDiv.innerHTML = '<small style="color: #ff6b6b;">Please enter a valid number of clams (at least 1).</small>';
+            return;
+          }
+          
+          const p = getProbabilities();
+          const pearlOrder = [
+            "Black Pearl",
+            "Gold Pearl",
+            "Purple Pearl",
+            "Blue Pearl",
+            "Green Pearl",
+            "White Pearl"
+          ];
+          
+          let html = '<div style="display: grid; gap: 10px;">';
+          
+          pearlOrder.forEach(pearlType => {
+            const key = pearlType.replace(" Pearl", "");
+            const probability = p[key] || 0;
+            
+            // Calculate P(at least 1) = 1 - (1 - p)^n
+            let odds = 0;
+            if (probability > 0 && probability < 1) {
+              odds = 1 - Math.pow(1 - probability, clamCount);
+            } else if (probability >= 1) {
+              odds = 1;
+            } else {
+              odds = 0;
+            }
+            
+            const percentage = odds * 100;
+            const scientific = odds.toExponential(4);
+            
+            let displayText = '';
+            if (percentage >= 0.01) {
+              displayText = `${percentage.toFixed(2)}%`;
+            } else if (percentage > 0) {
+              displayText = `${percentage.toFixed(6)}%`;
+            } else {
+              displayText = '0%';
+            }
+            
+            html += `
+              <div style="display: flex; align-items: center; gap: 12px; padding: 10px; background: rgba(30, 30, 45, 0.5); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                <img src="${pearlImages[pearlType]}" alt="${pearlType}" style="width: 32px; height: 32px; flex-shrink: 0;">
+                <div style="flex: 1;">
+                  <div style="color: #e0e0e0; font-weight: 500; font-size: 0.95rem;">${pearlType}</div>
+                  <div style="color: #ffd369; font-size: 1.1rem; font-weight: 600; margin-top: 4px;">${displayText}</div>
+                </div>
+              </div>
+            `;
+          });
+          
+          html += '</div>';
+          resultsDiv.innerHTML = html;
+        } catch (error) {
+          resultsDiv.innerHTML = '<small style="color: #ff6b6b;">Error calculating odds. Please check your inputs.</small>';
+          console.error(error);
         }
       }
 
