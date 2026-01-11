@@ -13,7 +13,7 @@
       }
 
       body {
-        background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 50%, #16213e 100%);
+        background: #1a1a2e;
         color: #e8e8e8;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
         padding: 40px 20px;
@@ -72,14 +72,10 @@
 
       .combined-box {
         background: rgba(30, 30, 45, 0.7);
-        backdrop-filter: blur(10px);
         padding: 28px;
         border-radius: 16px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4),
-                    0 2px 8px rgba(0, 0, 0, 0.2),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 211, 105, 0.3);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        transition: transform 0.2s ease;
         display: flex;
         gap: 32px;
         flex-wrap: wrap;
@@ -87,10 +83,6 @@
 
       .combined-box:hover {
         transform: translateY(-2px);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5),
-                    0 4px 12px rgba(0, 0, 0, 0.3),
-                    0 0 0 1px rgba(255, 211, 105, 0.2),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.08);
       }
 
       .config-section {
@@ -159,7 +151,6 @@
         background: rgba(15, 15, 25, 0.6);
         border-radius: 12px;
         border: 1px solid rgba(255, 255, 255, 0.05);
-        box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
       }
 
       /* INPUTS */
@@ -174,7 +165,6 @@
         font-size: 0.95rem;
         font-weight: 500;
         transition: all 0.2s ease;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
       }
 
       input[type="number"]:hover {
@@ -186,7 +176,6 @@
         border-color: #ffd369;
         outline: none;
         background: rgba(30, 30, 40, 0.95);
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
       }
 
       button {
@@ -200,7 +189,6 @@
         border-radius: 10px;
         cursor: pointer;
         transition: all 0.2s ease;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         letter-spacing: 0.3px;
         margin-top: 20px;
         width: 100%;
@@ -209,12 +197,10 @@
       button:hover {
         background: linear-gradient(135deg, #ffdf85 0%, #ffc266 100%);
         transform: translateY(-2px);
-        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
       }
 
       button:active {
         transform: translateY(0);
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
       }
 
       #scrollHint {
@@ -241,19 +227,14 @@
 
       .day-box {
         background: rgba(30, 30, 45, 0.6);
-        backdrop-filter: blur(10px);
         padding: 20px;
         border-radius: 14px;
         border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.05);
         transition: all 0.3s ease;
       }
 
       .day-box:hover {
         transform: translateY(-4px);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.08);
         border-color: rgba(255, 211, 105, 0.2);
       }
 
@@ -353,7 +334,6 @@
         width: 100%;
         height: 100%;
         background: rgba(0, 0, 0, 0.7);
-        backdrop-filter: blur(4px);
         z-index: 1000;
         justify-content: center;
         align-items: center;
@@ -365,25 +345,42 @@
 
       .pearl-modal-content {
         background: rgba(30, 30, 45, 0.95);
-        backdrop-filter: blur(10px);
         padding: 28px;
         border-radius: 16px;
         border: 1px solid rgba(255, 211, 105, 0.3);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
         max-width: 500px;
         width: 90%;
         max-height: 80vh;
-        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
         position: relative;
       }
 
       .pearl-modal-header {
         display: flex;
         justify-content: space-between;
-        align-items: center;
+        align-items: flex-start;
         margin-bottom: 20px;
         padding-bottom: 12px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        flex-shrink: 0;
+      }
+
+      .pearl-modal-header-text {
+        flex: 1;
+      }
+
+      .pearl-modal-description {
+        color: #c8c8c8;
+        margin: 8px 0 0 0;
+        font-size: 0.9rem;
+      }
+
+      #modalContent {
+        overflow-y: auto;
+        flex: 1;
+        min-height: 0;
+        padding-right: 12px;
       }
 
       .pearl-modal-header h3 {
@@ -456,11 +453,9 @@
       .chart-tooltip {
         position: absolute;
         background: rgba(30, 30, 45, 0.95);
-        backdrop-filter: blur(10px);
         padding: 12px 16px;
         border-radius: 8px;
         border: 1px solid rgba(255, 211, 105, 0.3);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
         pointer-events: none;
         z-index: 1000;
         display: none;
@@ -563,11 +558,9 @@
         left: 50%;
         transform: translateX(-50%);
         background: rgba(30, 30, 45, 0.98);
-        backdrop-filter: blur(10px);
         padding: 12px 16px;
         border-radius: 8px;
         border: 1px solid rgba(255, 211, 105, 0.3);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
         color: #ddd;
         font-size: 0.8rem;
         line-height: 1.5;
@@ -604,11 +597,9 @@
         left: 50%;
         transform: translateX(-50%);
         background: rgba(30, 30, 45, 0.98);
-        backdrop-filter: blur(10px);
         padding: 12px 16px;
         border-radius: 8px;
         border: 1px solid rgba(255, 211, 105, 0.3);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
         color: #ddd;
         font-size: 0.85rem;
         line-height: 1.6;
@@ -628,11 +619,9 @@
         left: 50%;
         transform: translateX(-50%);
         background: rgba(30, 30, 45, 0.98);
-        backdrop-filter: blur(10px);
         padding: 12px 16px;
         border-radius: 8px;
         border: 1px solid rgba(255, 211, 105, 0.3);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
         color: #ddd;
         font-size: 0.85rem;
         line-height: 1.6;
@@ -774,7 +763,6 @@
         width: 50px;
         height: 50px;
         background: rgba(255, 211, 105, 0.9);
-        backdrop-filter: blur(10px);
         border: 2px solid rgba(255, 211, 105, 0.5);
         border-radius: 50%;
         cursor: pointer;
@@ -783,7 +771,6 @@
         justify-content: center;
         z-index: 999;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         padding: 0;
         margin: 0;
       }
@@ -791,7 +778,6 @@
       #scrollToTop:hover {
         background: rgba(255, 211, 105, 1);
         transform: translateY(-3px);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
       }
 
       #scrollToTop.active {
@@ -947,7 +933,10 @@
     <div id="pearlModal" class="pearl-modal">
       <div class="pearl-modal-content">
         <div class="pearl-modal-header">
-          <h3 id="modalTitle">Pearl Timing Details</h3>
+          <div class="pearl-modal-header-text">
+            <h3 id="modalTitle">Pearl Timing Details</h3>
+            <p id="modalDescription" class="pearl-modal-description"></p>
+          </div>
           <button class="pearl-modal-close" onclick="closePearlModal()">&times;</button>
         </div>
         <div id="modalContent"></div>
@@ -1439,8 +1428,34 @@
             // Create comma-separated list of pearl types for filtering
             const pearlTypesInDay = Object.keys(day).join(',');
             
+            // Find the best (rarest) pearl on this day
+            // Pearl colors for top border accent
+            const pearlColors = {
+              "White Pearl": "#e0e0e0",
+              "Green Pearl": "#4caf50",
+              "Blue Pearl": "#2196f3",
+              "Purple Pearl": "#9c27b0",
+              "Gold Pearl": "#ffd700",
+              "Black Pearl": "#333333"
+            };
+            
+            let bestPearl = null;
+            let bestPearlIndex = -1;
+            for (let k of pearlOrder) {
+              if (day[k] && pearlColors[k]) {
+                const index = pearlOrder.indexOf(k);
+                if (index > bestPearlIndex) {
+                  bestPearlIndex = index;
+                  bestPearl = k;
+                }
+              }
+            }
+            
+            const borderColor = bestPearl ? pearlColors[bestPearl] : "transparent";
+            const borderStyle = bestPearl ? `border-top: 3px solid ${borderColor};` : "";
+            
           let card = `
-      <div class="day-box" data-day="${d}" data-pearl-types="${pearlTypesInDay}" onclick="showDayTiming(${d})" style="cursor: pointer;" data-tooltip="${dayTooltip.replace(/"/g, '&quot;')}">
+      <div class="day-box" data-day="${d}" data-pearl-types="${pearlTypesInDay}" onclick="showDayTiming(${d})" style="cursor: pointer; ${borderStyle}" data-tooltip="${dayTooltip.replace(/"/g, '&quot;')}">
         <h3>Day ${d}</h3>
         <small>Laps: ${laps.toFixed(2)} | Time: ${minutesPerDay.toFixed(2)} min</small>
         <div class="pearls-grid">
@@ -1680,6 +1695,7 @@
       function showPearlTiming(day, pearlType) {
         const modal = document.getElementById("pearlModal");
         const modalTitle = document.getElementById("modalTitle");
+        const modalDescription = document.getElementById("modalDescription");
         const modalContent = document.getElementById("modalContent");
         
         if (!modal || !window.pearlTimingData) return;
@@ -1687,13 +1703,15 @@
         // Get timing data for this pearl type on this day
         const dayData = window.pearlTimingData[day];
         if (!dayData || !dayData[pearlType] || dayData[pearlType].length === 0) {
+          modalDescription.textContent = "";
           modalContent.innerHTML = "<p style='color: #aaa;'>No timing data available for this pearl type on this day.</p>";
         } else {
           const timings = dayData[pearlType];
           
           modalTitle.textContent = `${pearlType} - Day ${day}`;
+          modalDescription.textContent = `Found ${timings.length} ${timings.length === 1 ? 'drop' : 'drops'} on Day ${day}:`;
           
-          let html = `<p style="color: #c8c8c8; margin-bottom: 16px; font-size: 0.9rem;">Found ${timings.length} ${timings.length === 1 ? 'drop' : 'drops'} on Day ${day}:</p>`;
+          let html = "";
           
             timings.forEach((timing, index) => {
               // Use time from start of day (not cumulative)
@@ -1734,6 +1752,7 @@
       function showDayTiming(day) {
         const modal = document.getElementById("pearlModal");
         const modalTitle = document.getElementById("modalTitle");
+        const modalDescription = document.getElementById("modalDescription");
         const modalContent = document.getElementById("modalContent");
         
         if (!modal || !window.dayChronologicalData) return;
@@ -1741,11 +1760,13 @@
         // Get chronological data for this day
         const dayData = window.dayChronologicalData[day];
         if (!dayData || dayData.length === 0) {
+          modalDescription.textContent = "";
           modalContent.innerHTML = "<p style='color: #aaa;'>No data available for this day.</p>";
         } else {
           modalTitle.textContent = `Day ${day} - All Drops`;
+          modalDescription.textContent = `${dayData.length} drops on Day ${day} in chronological order:`;
           
-          let html = `<p style="color: #c8c8c8; margin-bottom: 16px; font-size: 0.9rem;">${dayData.length} drops on Day ${day} in chronological order:</p>`;
+          let html = "";
           
           dayData.forEach((drop, index) => {
             const hours = Math.floor(drop.timeMinutes / 60);
@@ -1785,6 +1806,7 @@
       function showTotalPearlTiming(pearlType) {
         const modal = document.getElementById("pearlModal");
         const modalTitle = document.getElementById("modalTitle");
+        const modalDescription = document.getElementById("modalDescription");
         const modalContent = document.getElementById("modalContent");
         
         if (!modal || !window.pearlTimingData) return;
@@ -1807,11 +1829,13 @@
         allDrops.sort((a, b) => a.cumulativeTimeMinutes - b.cumulativeTimeMinutes);
         
         if (allDrops.length === 0) {
+          modalDescription.textContent = "";
           modalContent.innerHTML = "<p style='color: #aaa;'>No drops found for this pearl type.</p>";
         } else {
           modalTitle.textContent = `${pearlType} - All Days`;
+          modalDescription.textContent = `Found ${allDrops.length} ${allDrops.length === 1 ? 'drop' : 'drops'} across all ${Object.keys(window.pearlTimingData).length} days:`;
           
-          let html = `<p style="color: #c8c8c8; margin-bottom: 16px; font-size: 0.9rem;">Found ${allDrops.length} ${allDrops.length === 1 ? 'drop' : 'drops'} across all ${Object.keys(window.pearlTimingData).length} days:</p>`;
+          let html = "";
           
           allDrops.forEach((drop, index) => {
             const hours = Math.floor(drop.timeMinutes / 60);
@@ -1851,6 +1875,7 @@
       function showAllDaysTiming() {
         const modal = document.getElementById("pearlModal");
         const modalTitle = document.getElementById("modalTitle");
+        const modalDescription = document.getElementById("modalDescription");
         const modalContent = document.getElementById("modalContent");
         
         if (!modal || !window.dayChronologicalData) return;
@@ -1871,12 +1896,14 @@
         allDrops.sort((a, b) => a.cumulativeTimeMinutes - b.cumulativeTimeMinutes);
         
         if (allDrops.length === 0) {
+          modalDescription.textContent = "";
           modalContent.innerHTML = "<p style='color: #aaa;'>No data available.</p>";
         } else {
           const totalDays = Object.keys(window.dayChronologicalData).length;
           modalTitle.textContent = `All Days - All Drops`;
+          modalDescription.textContent = `${allDrops.length} drops across all ${totalDays} days in chronological order:`;
           
-          let html = `<p style="color: #c8c8c8; margin-bottom: 16px; font-size: 0.9rem;">${allDrops.length} drops across all ${totalDays} days in chronological order:</p>`;
+          let html = "";
           
           allDrops.forEach((drop, index) => {
             const hours = Math.floor(drop.timeMinutes / 60);
@@ -1916,6 +1943,7 @@
       function closePearlModal() {
         const modal = document.getElementById("pearlModal");
         const modalTitle = document.getElementById("modalTitle");
+        const modalDescription = document.getElementById("modalDescription");
         const modalContent = document.getElementById("modalContent");
         
         if (modal) {
@@ -1925,6 +1953,9 @@
         // Clear modal content to prevent lag
         if (modalTitle) {
           modalTitle.textContent = "";
+        }
+        if (modalDescription) {
+          modalDescription.textContent = "";
         }
         if (modalContent) {
           modalContent.innerHTML = "";
