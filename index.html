@@ -1461,8 +1461,8 @@
               <small>Percentage: ${percent}%</small>
             `;
             
-            // Only show average per day if viewing all days
-            if (selectedDay === null) {
+            // Only show average per day if viewing all days AND there's more than 1 day
+            if (selectedDay === null && days > 1) {
               const avgPerDay = days > 0 
                 ? (hoveredBar.value / days).toFixed(2)
                 : "0.00";
