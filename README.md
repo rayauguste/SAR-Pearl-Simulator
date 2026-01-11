@@ -41,7 +41,7 @@ By testing out different scenarios with the actual drop rates, you can see ahead
 ### Step 3: Run the Simulator
 
 1. Navigate to the extracted folder
-2. Locate the file `pearl_simulator.html`
+2. Locate the file `index.html`
 3. Double-click the file to open it in your default web browser
    - Alternatively, right-click the file and select **"Open with"** → choose your preferred browser (Chrome, Firefox, Edge, etc.)
 
@@ -78,13 +78,14 @@ That's it! The simulator will load in your browser and you can start using it im
 
 ```
 PearlSimulator/
-├── pearl_simulator.html  (Main application file)
+├── index.html            (Main application file)
+├── favicon.ico           (Favicon icon file)
 ├── README.md             (This file)
 └── [pearl image files]   (Optional: black.png, gold.png, purple.png, etc.)
 ```
 
 ## Troubleshooting
 
-- **Images not showing?** Make sure the pearl image files (black.png, gold.png, etc.) are in the same folder as `pearl_simulator.html`
+- **Images not showing?** Make sure the pearl image files (black.png, gold.png, etc.) are in the same folder as `index.html`
 - **Page not loading?** Try opening the HTML file with a different browser
 - **Results look incorrect?** Verify that your drop probability values sum to less than 1.0
