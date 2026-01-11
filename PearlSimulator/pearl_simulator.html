@@ -913,7 +913,7 @@
             <select id="dayFilterSelect">
               <!-- Options will be populated by JavaScript -->
             </select>
-          </div>
+        </div>
           <p style="color: #c8c8c8; font-size: 0.9rem; line-height: 1.6; margin-bottom: 16px;">
             <strong style="color: #ffd369;">Hover</strong> over bars for details, <strong style="color: #ffd369;">click</strong> to see all drops of that type.
             <span class="info-icon">i</span>
@@ -1120,6 +1120,38 @@
             return;
           }
           
+          // Calculate appropriate step size and number of grid lines based on max value
+          let stepSize, numSteps;
+          if (max <= 1) {
+            stepSize = 1;
+            numSteps = 1; // Show 0 and 1
+          } else if (max <= 5) {
+            stepSize = 1;
+            numSteps = max; // One line per integer (0, 1, 2, 3, 4, 5)
+          } else if (max <= 10) {
+            stepSize = 2;
+            numSteps = Math.ceil(max / stepSize);
+          } else if (max <= 50) {
+            stepSize = 10;
+            numSteps = Math.ceil(max / stepSize);
+          } else if (max <= 100) {
+            stepSize = 20;
+            numSteps = 5;
+          } else if (max <= 500) {
+            stepSize = 100;
+            numSteps = 5;
+          } else {
+            // For larger values, use 5 grid lines
+            stepSize = Math.ceil(max / 5);
+            // Round stepSize to a nice number
+            const niceSteps = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000];
+            stepSize = niceSteps.find(s => s >= stepSize) || stepSize;
+            numSteps = 5;
+          }
+          
+          // Calculate actual max (rounded up to nearest step)
+          const actualMax = Math.ceil(max / stepSize) * stepSize;
+          
           const padding = { top: 40, right: 20, bottom: 50, left: 50 };
           const chartWidth = Math.max(0, displayWidth - padding.left - padding.right);
           const chartHeight = Math.max(0, displayHeight - padding.top - padding.bottom);
@@ -1134,28 +1166,31 @@
           
           // Reset bar positions for interactivity
           chartBarPositions = [];
-        
+
         // Draw background
         ctx.fillStyle = "rgba(15, 15, 25, 0.6)";
         ctx.fillRect(0, 0, displayWidth, displayHeight);
         
-        // Draw grid lines
+        // Draw grid lines - adaptive based on max value
         ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
         ctx.lineWidth = 1;
-        const gridLines = 5;
-        for (let i = 0; i <= gridLines; i++) {
-          const y = padding.top + (chartHeight / gridLines) * i;
+        
+        // Draw grid lines
+        for (let i = 0; i <= numSteps; i++) {
+          const value = actualMax - (stepSize * i);
+          if (value < 0) continue; // Skip negative values
+          
+          const y = padding.top + chartHeight * (1 - (value / actualMax));
           ctx.beginPath();
           ctx.moveTo(padding.left, y);
           ctx.lineTo(displayWidth - padding.right, y);
           ctx.stroke();
 
           // Y-axis labels
-          const value = max - (max / gridLines) * i;
           ctx.fillStyle = "#aaa";
           ctx.font = "11px sans-serif";
           ctx.textAlign = "right";
-          ctx.fillText(Math.round(value).toLocaleString(), padding.left - 10, y + 4);
+          ctx.fillText(value.toLocaleString(), padding.left - 10, y + 4);
         }
 
           // Draw bars - always show all bars (6 pearl types + empty clams)
@@ -1163,7 +1198,7 @@
             try {
               const x = padding.left + i * barSpacing + (barSpacing - barWidth) / 2;
               const numValue = typeof v === 'number' && !isNaN(v) ? v : 0;
-              let barHeight = (numValue / max) * chartHeight;
+              let barHeight = (numValue / actualMax) * chartHeight;
               
               // Ensure minimum visible height for all bars (even zero values)
               const minHeight = 4;
@@ -1533,7 +1568,7 @@
 
           card += `</div></div>`;
             if (resultsEl) resultsEl.innerHTML += card;
-          }
+        }
 
           // Add event listeners to handle tooltip priority
           // Hide day-box tooltips when hovering anywhere in the pearls-grid area
