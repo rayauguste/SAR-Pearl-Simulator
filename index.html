@@ -580,7 +580,7 @@
       }
 
       .info-icon:hover::after {
-        content: "Each day = perfect island loop with all 41 clams untouched. Time calculations based on 5 minutes per complete loop. Results show idealized outcomes.";
+        content: "Each day = perfect island loop with all clams untouched. Time calculations based on your configured minutes per loop. Results show idealized outcomes.";
         position: absolute;
         bottom: calc(100% + 10px);
         left: 50%;
@@ -856,6 +856,12 @@
 
             <label>Days to simulate</label>
             <input id="daysToSim" type="number" value="50" min="1" max="365" />
+
+            <label style="margin-top: 16px;">Clams per island loop</label>
+            <input id="clamsPerLoop" type="number" value="41" min="1" />
+
+            <label>Minutes per island loop</label>
+            <input id="minutesPerLoop" type="number" value="5" min="0.1" step="0.1" />
 
             <div style="margin-top: 24px;">
               <div class="collapsible-header" onclick="toggleDropChances()">
@@ -1570,8 +1576,10 @@
         let totals = {};
         Object.keys(pearlImages).forEach((k) => (totals[k] = 0));
 
-        const clams = +clamsPerDay.value;
+          const clams = +clamsPerDay.value;
           let days = +daysToSim.value;
+          const clamsPerLoop = +document.getElementById("clamsPerLoop").value || 41;
+          const minutesPerLoop = +document.getElementById("minutesPerLoop").value || 5;
           
           // Validate days: must be between 1 and 365
           if (days < 1) days = 1;
@@ -1580,8 +1588,8 @@
             daysToSim.value = days;
           }
 
-          const laps = clams / 41;
-          const minutesPerDay = (clams / 41) * 5;
+          const laps = clams / clamsPerLoop;
+          const minutesPerDay = (clams / clamsPerLoop) * minutesPerLoop;
 
         const pearlOrder = [
           "Empty Clam",
@@ -1615,10 +1623,10 @@
                 dayPearlTimings[r] = [];
               }
               // Calculate: time from start of this day (not cumulative)
-              const timeFromDayStart = ((i + 1) / 41) * 5;
+              const timeFromDayStart = ((i + 1) / clamsPerLoop) * minutesPerLoop;
               // Also track cumulative for time since previous calculations
               const totalClamsSoFar = (d - 1) * clams + (i + 1);
-              const cumulativeTimeMinutes = (totalClamsSoFar / 41) * 5;
+              const cumulativeTimeMinutes = (totalClamsSoFar / clamsPerLoop) * minutesPerLoop;
               const dropData = {
                 type: r,
                 clam: totalClamsSoFar,
@@ -1755,19 +1763,22 @@
         
         let totalClams, totalLaps, totalMinutes, totalHours, titleText, clickHandler;
         
+        const clamsPerLoop = +document.getElementById("clamsPerLoop").value || 41;
+        const minutesPerLoop = +document.getElementById("minutesPerLoop").value || 5;
+        
         if (selectedDay && window.dayTotals && window.dayTotals[selectedDay]) {
           // Single day summary
           totalClams = clams;
-          totalLaps = clams / 41;
-          totalMinutes = totalLaps * 5;
+          totalLaps = clams / clamsPerLoop;
+          totalMinutes = totalLaps * minutesPerLoop;
           totalHours = (totalMinutes / 60).toFixed(2);
           titleText = `Day ${selectedDay} Summary <small style="color: #aaa; font-size: 0.8rem; font-weight: normal;">(Click to see all drops)</small>`;
           clickHandler = `showDayTiming(${selectedDay})`;
         } else {
           // All days summary
           totalClams = clams * days;
-          totalLaps = (clams / 41) * days;
-          totalMinutes = totalLaps * 5;
+          totalLaps = (clams / clamsPerLoop) * days;
+          totalMinutes = totalLaps * minutesPerLoop;
           totalHours = (totalMinutes / 60).toFixed(2);
           titleText = `Summary <small style="color: #aaa; font-size: 0.8rem; font-weight: normal;">(Click to see all drops)</small>`;
           clickHandler = `showAllDaysTiming()`;
