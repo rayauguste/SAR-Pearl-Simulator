@@ -580,7 +580,7 @@
       }
 
       .info-icon:hover::after {
-        content: "Each day = perfect island loop with all clams on island untouched. Time calculations based on your configured minutes per loop. Results show idealized outcomes.";
+        content: "Each day = perfect island loop with all clams on island untouched. Time calculations based on your configured minutes per lap. Results show idealized outcomes.";
         position: absolute;
         bottom: calc(100% + 10px);
         left: 50%;
@@ -601,6 +601,59 @@
       }
 
       .info-icon:hover::before {
+        content: "";
+        position: absolute;
+        bottom: calc(100% + 4px);
+        left: 50%;
+        transform: translateX(-50%);
+        border: 6px solid transparent;
+        border-bottom-color: rgba(255, 211, 105, 0.3);
+        z-index: 1001;
+        pointer-events: none;
+      }
+
+      /* Label Info Icon */
+      .label-info-icon {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 6px;
+        cursor: help;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 2px solid #ffd369;
+        color: #ffd369;
+        font-size: 0.7rem;
+        font-weight: bold;
+        font-family: Arial, sans-serif;
+        line-height: 1;
+        vertical-align: middle;
+      }
+
+      .label-info-icon:hover::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: calc(100% + 10px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(30, 30, 45, 0.98);
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 211, 105, 0.3);
+        color: #ddd;
+        font-size: 0.8rem;
+        line-height: 1.5;
+        white-space: normal;
+        width: 260px;
+        z-index: 1000;
+        pointer-events: none;
+        font-weight: normal;
+        text-align: left;
+      }
+
+      .label-info-icon:hover::before {
         content: "";
         position: absolute;
         bottom: calc(100% + 4px);
@@ -851,16 +904,16 @@
               the drop chances for each pearl color to see how your results change.
             </p>
 
-            <label>Clams per day</label>
+            <label>Number of clams opened per day <span class="label-info-icon" data-tooltip="The total number of clams you open each day. This determines how many pearl drop chances you get per day.">i</span></label>
             <input id="clamsPerDay" type="number" value="150" />
 
-            <label>Days to simulate</label>
+            <label>Days to simulate <span class="label-info-icon" data-tooltip="How many days you want to simulate. Results will show day-by-day breakdown and total statistics across all days.">i</span></label>
             <input id="daysToSim" type="number" value="50" min="1" max="365" />
 
-            <label>Clams on island</label>
+            <label>Total clams on island <span class="label-info-icon" data-tooltip="The total number of clams available on the island. Used to calculate the total time spent farming.">i</span></label>
             <input id="clamsPerLoop" type="number" value="41" min="1" />
 
-            <label>Minutes per loop</label>
+            <label>Minutes per lap <span class="label-info-icon" data-tooltip="The time it takes to complete one full lap around the island collecting all clams. Used to calculate total time spent farming.">i</span></label>
             <input id="minutesPerLoop" type="number" value="5" min="0.1" step="0.1" />
 
             <div style="margin-top: 24px;">

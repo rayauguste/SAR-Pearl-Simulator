@@ -50,10 +50,10 @@ That's it! The simulator will load in your browser and you can start using it im
 ## How to Use
 
 1. **Set Simulation Parameters:**
-   - Enter the number of clams you collect per day
+   - Enter the number of clams opened per day
    - Set how many days you want to simulate
-   - Configure clams on island (default: 41) - the number of clams available on the island
-   - Configure minutes per loop (default: 5) - the time it takes to complete one loop around the island
+   - Configure total clams on island (default: 41) - the number of clams available on the island
+   - Configure minutes per lap (default: 5) - the time it takes to complete one lap around the island
 
 2. **Adjust Drop Chances (Optional):**
    - Modify the probability values (0-1) for each pearl type
@@ -73,10 +73,10 @@ That's it! The simulator will load in your browser and you can start using it im
 ## Notes
 
 - The simulator assumes perfect island loops with all clams untouched
-- Default settings assume 41 clams on island and 5 minutes per loop (configurable)
+- Default settings assume 41 total clams on island and 5 minutes per lap (configurable)
 - Results represent idealized outcomes without player interference
 - All image files (black.png, gold.png, purple.png, blue.png, green.png, white.png, empty.png) must be in the same directory as `index.html` for the simulator to work correctly
-- You can customize the number of clams on island and time per loop to match your actual gameplay
+- You can customize the total clams on island and time per lap to match your actual gameplay
 
 ## File Structure
 
