@@ -1028,6 +1028,11 @@
                   These default values represent the rare drop rates.
                 </p>
 
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding: 10px 12px; background: rgba(20, 20, 30, 0.5); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.08);">
+                  <input type="checkbox" id="questsBoostToggle" checked onchange="applyQuestsBoost()" style="width: 20px; height: 20px; cursor: pointer; accent-color: #ffd369;" />
+                  <label for="questsBoostToggle" style="margin: 0; cursor: pointer; color: #ddd; font-size: 0.95rem;">Quests boost (use boosted Black & Gold chances)</label>
+                </div>
+
                 <div id="dropChancesGrid" style="display: grid; grid-template-columns: 1fr; gap: 8px;">
                   <div>
                     <label>Black</label>
@@ -1180,6 +1185,21 @@
         "White Pearl": "#e6e6e6",
         "Empty Clam": "#666",
       };
+
+      const QUEST_BOOST_VALUES = {
+        black: { base: 0.0001, boosted: 0.0004 },
+        gold: { base: 0.001, boosted: 0.002 }
+      };
+
+      function applyQuestsBoost() {
+        const toggle = document.getElementById("questsBoostToggle");
+        const pBlack = document.getElementById("pBlack");
+        const pGold = document.getElementById("pGold");
+        if (!toggle || !pBlack || !pGold) return;
+        const useBoost = toggle.checked;
+        pBlack.value = useBoost ? QUEST_BOOST_VALUES.black.boosted : QUEST_BOOST_VALUES.black.base;
+        pGold.value = useBoost ? QUEST_BOOST_VALUES.gold.boosted : QUEST_BOOST_VALUES.gold.base;
+      }
 
       function getProbabilities() {
         const keys = ["Black", "Gold", "Purple", "Blue", "Green", "White"];
