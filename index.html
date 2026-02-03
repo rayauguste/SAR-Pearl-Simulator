@@ -1005,14 +1005,17 @@
               the drop chances for each pearl color to see how your results change.
             </p>
 
-            <label>Number of clams opened per day <span class="label-info-icon" data-tooltip="The total number of clams you open each day. This determines how many pearl drop chances you get per day.">i</span></label>
+            <label>Number of clams opened per day <span class="label-info-icon" data-tooltip="The number of clams you actually open each day (drop chances). When fewer clams are available per lap, you need more laps and more time to open this many.">i</span></label>
             <input id="clamsPerDay" type="number" value="150" />
 
             <label>Days to simulate <span class="label-info-icon" data-tooltip="How many days you want to simulate. Results will show day-by-day breakdown and total statistics across all days.">i</span></label>
             <input id="daysToSim" type="number" value="50" min="1" max="365" />
 
-            <label>Total clams on island <span class="label-info-icon" data-tooltip="The total number of clams available on the island. Used to calculate the total time spent farming.">i</span></label>
+            <label>Total clams on island <span class="label-info-icon" data-tooltip="The total number of clams on the island (max possible per lap).">i</span></label>
             <input id="clamsPerLoop" type="number" value="41" min="1" />
+
+            <label>Clams available per lap (average) <span class="label-info-icon" data-tooltip="Not all clams are closed each lap—some may already be opened. Set how many you typically find still closed per lap (e.g. 35). Use the same as total if you always get a full set.">i</span></label>
+            <input id="clamsAvailablePerLap" type="number" value="41" min="1" />
 
             <label>Minutes per lap <span class="label-info-icon" data-tooltip="The time it takes to complete one full lap around the island collecting all clams. Used to calculate total time spent farming.">i</span></label>
             <input id="minutesPerLoop" type="number" value="5" min="0.1" step="0.1" />
@@ -1750,9 +1753,12 @@
         let totals = {};
         Object.keys(pearlImages).forEach((k) => (totals[k] = 0));
 
-        const clams = +clamsPerDay.value;
+          const clams = +clamsPerDay.value;
           let days = +daysToSim.value;
           const clamsPerLoop = +document.getElementById("clamsPerLoop").value || 41;
+          let clamsAvailablePerLap = +document.getElementById("clamsAvailablePerLap").value || 41;
+          if (clamsAvailablePerLap < 1) clamsAvailablePerLap = 1;
+          if (clamsAvailablePerLap > clamsPerLoop) clamsAvailablePerLap = clamsPerLoop;
           const minutesPerLoop = +document.getElementById("minutesPerLoop").value || 5;
           
           // Validate days: must be between 1 and 365
@@ -1762,8 +1768,9 @@
             daysToSim.value = days;
           }
 
-          const laps = clams / clamsPerLoop;
-          const minutesPerDay = (clams / clamsPerLoop) * minutesPerLoop;
+          // Fewer closed clams per lap = more laps and more time to open the same number of clams
+          const laps = clams / clamsAvailablePerLap;
+          const minutesPerDay = (clams / clamsAvailablePerLap) * minutesPerLoop;
 
         const pearlOrder = [
           "Empty Clam",
@@ -1797,10 +1804,10 @@
                 dayPearlTimings[r] = [];
               }
               // Calculate: time from start of this day (not cumulative)
-              const timeFromDayStart = ((i + 1) / clamsPerLoop) * minutesPerLoop;
+              const timeFromDayStart = ((i + 1) / clamsAvailablePerLap) * minutesPerLoop;
               // Also track cumulative for time since previous calculations
               const totalClamsSoFar = (d - 1) * clams + (i + 1);
-              const cumulativeTimeMinutes = (totalClamsSoFar / clamsPerLoop) * minutesPerLoop;
+              const cumulativeTimeMinutes = (totalClamsSoFar / clamsAvailablePerLap) * minutesPerLoop;
               const dropData = {
                 type: r,
                 clam: totalClamsSoFar,
@@ -1936,6 +1943,9 @@
         if (!totalSummaryEl) return;
         
         const clamsPerLoop = +document.getElementById("clamsPerLoop").value || 41;
+        let clamsAvailablePerLap = +document.getElementById("clamsAvailablePerLap").value || 41;
+        if (clamsAvailablePerLap < 1) clamsAvailablePerLap = 1;
+        if (clamsAvailablePerLap > clamsPerLoop) clamsAvailablePerLap = clamsPerLoop;
         const minutesPerLoop = +document.getElementById("minutesPerLoop").value || 5;
         
         let totalClams, totalLaps, totalMinutes, totalHours, titleText, clickHandler;
@@ -1943,7 +1953,7 @@
         if (selectedDay && window.dayTotals && window.dayTotals[selectedDay]) {
           // Single day summary
           totalClams = clams;
-          totalLaps = clams / clamsPerLoop;
+          totalLaps = clams / clamsAvailablePerLap;
           totalMinutes = totalLaps * minutesPerLoop;
           totalHours = (totalMinutes / 60).toFixed(2);
           titleText = `Day ${selectedDay} Summary <small style="color: #aaa; font-size: 0.8rem; font-weight: normal;">(Click to see all drops)</small>`;
@@ -1951,7 +1961,7 @@
         } else {
           // All days summary
           totalClams = clams * days;
-          totalLaps = (clams / clamsPerLoop) * days;
+          totalLaps = (clams / clamsAvailablePerLap) * days;
           totalMinutes = totalLaps * minutesPerLoop;
           totalHours = (totalMinutes / 60).toFixed(2);
           titleText = `Summary <small style="color: #aaa; font-size: 0.8rem; font-weight: normal;">(Click to see all drops)</small>`;
